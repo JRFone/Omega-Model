@@ -8,6 +8,7 @@ import platform
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -35,9 +36,44 @@ def _tool(name: str) -> str:
     raise FileNotFoundError(f"Required build tool was not found: {name}")
 
 
+def _compiler() -> str | None:
+    """Find a usable compiler even in a normal Windows shell.
+
+    WinGet installs WinLibs into a versioned package directory that is not
+    always added to PATH until a new login.  Discovering it here makes the
+    documented one-command native build work immediately after installation.
+    """
+    located = shutil.which("g++") or shutil.which("clang++") or shutil.which("cl.exe")
+    if located or platform.system() != "Windows":
+        return located
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    if local_app_data:
+        package_root = Path(local_app_data) / "Microsoft" / "WinGet" / "Packages"
+        candidates = sorted(
+            package_root.glob("BrechtSanders.WinLibs*/*/bin/g++.exe"),
+            key=lambda path: path.stat().st_mtime_ns,
+            reverse=True,
+        )
+        if candidates:
+            return str(candidates[0])
+    return None
+
+
 def _version_line(command: list[str]) -> str:
     completed = subprocess.run(command, check=True, capture_output=True, text=True)
     return next((line.strip() for line in completed.stdout.splitlines() if line.strip()), "unknown")
+
+
+def _copy_with_retry(source: Path, destination: Path, attempts: int = 6) -> None:
+    """Copy a just-built DLL after transient test/antivirus handles close."""
+    for attempt in range(attempts):
+        try:
+            shutil.copy2(source, destination)
+            return
+        except PermissionError:
+            if attempt + 1 >= attempts:
+                raise
+            time.sleep(0.5 * (attempt + 1))
 
 
 def _library_candidates(build_dir: Path) -> list[Path]:
@@ -62,7 +98,7 @@ def build(*, clean: bool, configuration: str, openmp: bool, tests: bool) -> dict
     ctest = _tool("ctest")
     generator_arguments: list[str] = []
     generator = "default"
-    compiler = shutil.which("g++") or shutil.which("clang++") or shutil.which("cl.exe")
+    compiler = _compiler()
     tool_path = Path(compiler).resolve().parent if compiler else None
     if platform.system() == "Windows":
         ninja = _tool("ninja")
@@ -101,7 +137,7 @@ def build(*, clean: bool, configuration: str, openmp: bool, tests: bool) -> dict
                 # CTest starts the executable from a clean process. Keep MinGW's
                 # runtime dependencies beside the test executable so the test is
                 # independent of the developer shell's PATH.
-                shutil.copy2(source, test_runtime_dir / name)
+                _copy_with_retry(source, test_runtime_dir / name)
                 runtime_sources.append(source)
 
     if tests:
@@ -112,12 +148,12 @@ def build(*, clean: bool, configuration: str, openmp: bool, tests: bool) -> dict
         raise FileNotFoundError("CMake completed but no Omega native shared library was found.")
     library = max(candidates, key=lambda path: path.stat().st_mtime_ns)
     destination = DESTINATION / library.name
-    shutil.copy2(library, destination)
+    _copy_with_retry(library, destination)
 
     runtime_libraries: list[str] = []
     for source in runtime_sources:
         installed_runtime = DESTINATION / source.name
-        shutil.copy2(source, installed_runtime)
+        _copy_with_retry(source, installed_runtime)
         runtime_libraries.append(str(installed_runtime))
 
     dll_directory = os.add_dll_directory(str(destination.parent)) if platform.system() == "Windows" else None

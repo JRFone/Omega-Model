@@ -5,9 +5,11 @@ import os
 import subprocess
 import sys
 import threading
+import traceback
 import webbrowser
 from pathlib import Path
-from tkinter import BOTH, END, LEFT, RIGHT, TOP, X, BooleanVar, IntVar, StringVar, Tk, filedialog, messagebox
+from queue import Empty, Queue
+from tkinter import BOTH, END, LEFT, RIGHT, TOP, X, BooleanVar, Canvas, IntVar, StringVar, Tk, filedialog, messagebox
 from tkinter import ttk
 from typing import Any, Callable, Mapping
 
@@ -21,8 +23,74 @@ from stock_model.interval_coverage import CoverageSettings, run_interval_coverag
 from stock_model.likelihood_profiles import ProfileSettings, profile_likelihood
 from stock_model.native_backend import native_status
 from stock_model.native_benchmark import NativeBenchmarkSettings, write_native_benchmark
+from chart_studio_app import NativeChartPreview
+from ui.model_health import assess_model_health
 
 ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
+
+
+class WrappedHealthTable(ttk.Frame):
+    COLUMNS = (
+        ("test", "Test", 1, 170),
+        ("quick_verdict", "Quick verdict", 1, 180),
+        ("accuracy_evidence", "Accuracy evidence", 2, 240),
+        ("confounding_risk", "Confounding risk", 2, 240),
+        ("reason", "Why", 2, 280),
+        ("next_action", "Next action", 2, 280),
+    )
+
+    def __init__(self, parent) -> None:
+        super().__init__(parent)
+        self.canvas = Canvas(self, highlightthickness=0)
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.canvas.pack(side=LEFT, fill=BOTH, expand=True)
+        self.scrollbar.pack(side=RIGHT, fill="y")
+        self.inner = ttk.Frame(self.canvas)
+        self.window = self.canvas.create_window((0, 0), window=self.inner, anchor="nw")
+        self.labels: list[tuple[object, int]] = []
+        self.row_index = 1
+        for column, (_key, title, weight, wrap) in enumerate(self.COLUMNS):
+            self.inner.columnconfigure(column, weight=weight, uniform="health")
+            label = ttk.Label(self.inner, text=title, style="HealthHeader.TLabel", anchor="center", padding=(6, 7))
+            label.grid(row=0, column=column, sticky="nsew", padx=1, pady=1)
+            self.labels.append((label, wrap))
+        self.inner.bind("<Configure>", self._sync)
+        self.canvas.bind("<Configure>", self._sync)
+
+    def add_row(self, row: Mapping[str, str], severity: str) -> None:
+        style = {"good": "HealthGood.TLabel", "warn": "HealthWarn.TLabel", "bad": "HealthBad.TLabel"}[severity]
+        for column, (key, _title, _weight, wrap) in enumerate(self.COLUMNS):
+            label = ttk.Label(
+                self.inner,
+                text=row.get(key, ""),
+                style=style,
+                anchor="nw",
+                justify="left",
+                wraplength=wrap,
+                padding=(7, 7),
+            )
+            label.grid(row=self.row_index, column=column, sticky="nsew", padx=1, pady=1)
+            label.bind("<MouseWheel>", self._wheel)
+            self.labels.append((label, wrap))
+        self.row_index += 1
+        self._sync()
+
+    def _sync(self, _event=None) -> None:
+        try:
+            width = max(600, self.canvas.winfo_width())
+            self.canvas.itemconfigure(self.window, width=width)
+            self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+            base = max(80, (width - 20) // 10)
+            for label, original in self.labels:
+                label.configure(wraplength=max(80, min(original, base * (2 if original >= 220 else 1))))
+        except Exception:
+            pass
+
+    def _wheel(self, event):
+        direction = -1 if getattr(event, "delta", 0) > 0 else 1
+        self.canvas.yview_scroll(direction * 3, "units")
+        return "break"
 
 
 class PriorityDiagnosticsApp:
@@ -46,6 +114,7 @@ class PriorityDiagnosticsApp:
         self.last_result: Mapping[str, Any] | None = None
         self.last_json: Path | None = None
         self.last_dashboard: Path | None = None
+        self.health_rows: list[dict[str, str]] = []
         self._configure_style()
         self._build()
         self.refresh_native_status()
@@ -60,6 +129,10 @@ class PriorityDiagnosticsApp:
         style.configure("PDTitle.TLabel", background="#0b1f33", foreground="white", font=("Segoe UI", 22, "bold"))
         style.configure("PDSub.TLabel", background="#0b1f33", foreground="#c4d2df", font=("Segoe UI", 10))
         style.configure("PDStatus.TLabel", background="#e8eef5", foreground="#334155", padding=(10, 7))
+        style.configure("HealthHeader.TLabel", background="#102a43", foreground="#ffffff", font=("Segoe UI", 9, "bold"))
+        style.configure("HealthGood.TLabel", background="#dcfce7", foreground="#14532d")
+        style.configure("HealthWarn.TLabel", background="#fef3c7", foreground="#78350f")
+        style.configure("HealthBad.TLabel", background="#fee2e2", foreground="#7f1d1d")
 
     def _build(self) -> None:
         header = ttk.Frame(self.root, padding=(22, 18), style="PDHeader.TFrame")
@@ -85,16 +158,23 @@ class PriorityDiagnosticsApp:
         self._file_row(source, 3, "Length composition (optional)", self.length_path, [("CSV", "*.csv"), ("All files", "*.*")])
 
         notebook = ttk.Notebook(self.root)
+        self.notebook = notebook
         notebook.pack(fill=BOTH, expand=True, padx=14, pady=6)
         engine_tab = ttk.Frame(notebook, padding=12)
         profile_tab = ttk.Frame(notebook, padding=12)
         aspm_tab = ttk.Frame(notebook, padding=12)
         coverage_tab = ttk.Frame(notebook, padding=12)
+        charts_tab = ttk.Frame(notebook, padding=8)
+        health_tab = ttk.Frame(notebook, padding=12)
+        self.charts_tab = charts_tab
+        self.health_tab = health_tab
         results_tab = ttk.Frame(notebook, padding=12)
         notebook.add(engine_tab, text="Native engine")
         notebook.add(profile_tab, text="Likelihood profiles")
         notebook.add(aspm_tab, text="Age-structured ASPM")
         notebook.add(coverage_tab, text="Interval coverage")
+        notebook.add(charts_tab, text="Diagnostic charts")
+        notebook.add(health_tab, text="Quick model health")
         notebook.add(results_tab, text="Results and evidence")
 
         engine_controls = ttk.Frame(engine_tab)
@@ -151,6 +231,23 @@ class PriorityDiagnosticsApp:
             wraplength=1000,
         ).pack(anchor="w")
 
+        ttk.Label(
+            health_tab,
+            text=(
+                "Quick visual interpretation of completed tests. 'Accurate' is used only for known-truth recovery; "
+                "a software PASS alone never establishes scientific accuracy."
+            ),
+            wraplength=1050,
+            justify="left",
+        ).pack(anchor="w", pady=(0, 8))
+        self.health_tree = self._health_tree(health_tab)
+
+        self.chart_note = StringVar(value="Run a diagnostic to display its chart here.")
+        ttk.Label(charts_tab, textvariable=self.chart_note, wraplength=1050, justify="left").pack(anchor="w", fill=X, pady=(0, 7))
+        self.diagnostic_chart = NativeChartPreview(charts_tab)
+        self.diagnostic_chart.pack(fill=BOTH, expand=True)
+        self.diagnostic_chart.show_message("Run a likelihood profile, ASPM comparison, coverage test, or native benchmark to see its chart.")
+
         result_buttons = ttk.Frame(results_tab)
         result_buttons.pack(fill=X)
         ttk.Button(result_buttons, text="Open JSON evidence", command=self.open_json).pack(side=LEFT)
@@ -190,6 +287,12 @@ class PriorityDiagnosticsApp:
         text.pack(fill=BOTH, expand=True, pady=(10, 0))
         return text
 
+    @staticmethod
+    def _health_tree(parent):
+        table = WrappedHealthTable(parent)
+        table.pack(fill=BOTH, expand=True)
+        return table
+
     def _browse(self, variable: StringVar, filetypes) -> None:
         path = filedialog.askopenfilename(filetypes=filetypes)
         if path:
@@ -203,6 +306,7 @@ class PriorityDiagnosticsApp:
 
     def _run_background(self, label: str, task: Callable[[], tuple[Mapping[str, Any], Path, Path | None]]) -> None:
         self.status.set(label)
+        outcome: Queue[tuple[str, Any]] = Queue(maxsize=1)
 
         def worker() -> None:
             try:
@@ -212,17 +316,110 @@ class PriorityDiagnosticsApp:
                 self.last_dashboard = dashboard
                 summary = result.get("summary") or {}
                 payload = json.dumps({"summary": summary, "json": str(json_path), "dashboard": str(dashboard) if dashboard else None}, indent=2, default=str)
-                self.root.after(0, lambda: self._show_result(payload))
-                self.root.after(0, lambda: self.status.set(f"Completed: {summary.get('status', 'finished')}. Evidence saved to {json_path}."))
+                health = assess_model_health(label, result)
+                outcome.put(("ok", (payload, health, result, summary, json_path)))
             except Exception as exc:
-                self.root.after(0, lambda: self.status.set("Run failed. The error remains visible."))
-                self.root.after(0, lambda: messagebox.showerror("Omega Priority Diagnostics", f"{type(exc).__name__}: {exc}"))
+                outcome.put(("error", (exc, traceback.format_exc())))
+
+        def poll() -> None:
+            try:
+                state, value = outcome.get_nowait()
+            except Empty:
+                try:
+                    if self.root.winfo_exists():
+                        self.root.after(35, poll)
+                except Exception:
+                    pass
+                return
+            if state == "ok":
+                payload, health, result, summary, json_path = value
+                self._show_result(payload, health, result)
+                self.status.set(f"Completed: {summary.get('status', 'finished')}. Evidence saved to {json_path}.")
+            else:
+                exc, detail = value
+                self.status.set("Run failed. The error remains visible.")
+                shell = getattr(self.root, "omega_shell", None)
+                if shell is not None:
+                    shell.log_error("Priority Diagnostics", exc, detail)
+                messagebox.showerror("Omega Priority Diagnostics", f"{type(exc).__name__}: {exc}")
 
         threading.Thread(target=worker, daemon=True).start()
+        self.root.after(35, poll)
 
-    def _show_result(self, text: str) -> None:
+    def _show_result(
+        self,
+        text: str,
+        health: Mapping[str, str] | None = None,
+        result: Mapping[str, Any] | None = None,
+    ) -> None:
         self.results_text.delete("1.0", END)
         self.results_text.insert(END, text)
+        chart_ready = False
+        if result is not None:
+            try:
+                figure, x_title, y_title, note = self._diagnostic_figure(result, health)
+                self.diagnostic_chart.show_figure(figure, health.get("test", "Diagnostic chart") if health else "Diagnostic chart", x_title, y_title)
+                self.chart_note.set(note)
+                chart_ready = True
+            except Exception as exc:
+                self.diagnostic_chart.show_message(f"The diagnostic completed, but its chart could not be built:\n{exc}")
+                self.chart_note.set("The numerical result remains available in Results and evidence.")
+        if health is not None:
+            self.health_rows.append(dict(health))
+            verdict = health.get("quick_verdict", "")
+            tag = "bad" if any(word in verdict for word in ("FAILED", "INACCURATE", "SENSITIVE")) else "warn" if any(word in verdict for word in ("WARNING", "POSSIBLE", "QUESTIONABLE", "REVIEW", "WEAK")) else "good"
+            self.health_tree.add_row(health, tag)
+            self.notebook.select(self.charts_tab if chart_ready else self.health_tab)
+
+    def _diagnostic_figure(
+        self,
+        result: Mapping[str, Any],
+        health: Mapping[str, str] | None,
+    ) -> tuple[Any, str, str, str]:
+        factory = InteractiveChartFactory(ChartProfile(range_slider=False, default_height=600))
+        title = health.get("test", "Diagnostic chart") if health else "Diagnostic chart"
+        profile = result.get("profile") or []
+        if profile:
+            figure = factory.likelihood_profile(
+                profile,
+                parameter_key="fixed_value",
+                objective_key="delta_nll",
+                title=title,
+                parameter_label=str((result.get("summary") or {}).get("parameter", "Parameter value")),
+            )
+            return figure, "Fixed parameter value", "Delta objective", "A flat curve or missing threshold crossing indicates weak parameter identifiability or confounding."
+        coverage = result.get("coverage") or []
+        if coverage:
+            figure = factory.interval_coverage(
+                coverage,
+                nominal_key="nominal",
+                empirical_key="empirical",
+                parameter_key="parameter",
+                title=title,
+            )
+            return figure, "Nominal interval coverage", "Observed coverage", "Points should remain close to the 1:1 calibration line; failed and incomplete intervals remain counted."
+        variants = result.get("variants") or []
+        full_model = result.get("full_model") or {}
+        full_history = full_model.get("history") or []
+        if full_history or any(row.get("history") for row in variants):
+            series: list[SeriesSpec] = []
+            if full_history:
+                series.append(SeriesSpec("Full age-structured model", [row["year"] for row in full_history], [row["depletion"] for row in full_history], mode="lines+markers"))
+            for variant in variants:
+                history = variant.get("history") or []
+                if history:
+                    series.append(SeriesSpec(str(variant.get("name", "ASPM variant")), [row["year"] for row in history], [row["depletion"] for row in history], mode="lines"))
+            figure = factory.time_series(series, title=title, x_title="Year", y_title="Relative spawning biomass / depletion")
+            return figure, "Year", "Relative biomass", "Divergence between the full fit and ASPM variants shows dependence on compositions, recruitment, indices, or structure."
+        summary = result.get("summary") or result
+        numeric = []
+        for key, value in summary.items():
+            if isinstance(value, (int, float)) and np.isfinite(float(value)) and not isinstance(value, bool):
+                numeric.append({"component": str(key).replace("_", " "), "value": float(value)})
+        if numeric:
+            figure = factory.likelihood_conflict(numeric[:16], component_key="component", value_key="value", preferred_key=None, title=title)
+            return figure, "Recorded value", "Diagnostic measure", "Summary measures from the completed diagnostic. Use the evidence tab for units, thresholds, and full precision."
+        raise ValueError("No numeric or trajectory values were available for this diagnostic.")
 
     def refresh_native_status(self) -> None:
         status = native_status()

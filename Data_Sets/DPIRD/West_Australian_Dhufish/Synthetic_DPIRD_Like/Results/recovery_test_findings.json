@@ -1,0 +1,10 @@
+{
+  "generated_utc": "2026-07-17T14:26:39.372309+00:00",
+  "conditioned_forward_rmse": 4.4969172124985776e-17,
+  "conditioned_fit_rmse": 0.00920854793302012,
+  "blind_fit_rmse": 0.1817141964216168,
+  "conditioned_fit_terminal_error": 0.021943374376367425,
+  "blind_fit_terminal_error": 0.14330727642812266,
+  "interpretation": "The exact conditioned forward run is an implementation check. The conditioned estimation checks parameter recovery. The blind estimation intentionally removes the annual recruitment truth and measures the current model-structure gap.",
+  "scientific_status": "controlled_synthetic_recovery_test_not_validation_of_dpird_raw_assessment"
+}

@@ -1,0 +1,25 @@
+{
+  "generated_utc": "2026-07-17T14:10:57.925068+00:00",
+  "software_test_completed": true,
+  "scientific_validation_completed": false,
+  "baseline_terminal_depletion": 0.3267208561559416,
+  "published_DPIRD_terminal_depletion": 0.15,
+  "stress_test_terminal_depletion_range": [
+    0.19497714570243868,
+    0.9974726377625509
+  ],
+  "north_vs_south_cpue_terminal_difference": 0.011007867873617128,
+  "age_information_terminal_effect": -0.6707517816066093,
+  "natural_mortality_terminal_range": [
+    0.19497714570243868,
+    0.418818120326035
+  ],
+  "main_result": "The public reconstruction is usable for stress testing, but it is not an exact reproduction of DPIRD's accepted assessment.",
+  "unresolved_model_gaps": [
+    "DPIRD raw input tables and accepted bespoke/SS run files are not public in the collected sources.",
+    "Omega currently fits one stock, while the updated DPIRD assessment estimates North and South recruitment separately.",
+    "Annual recruitment deviations are not simultaneously estimated in the current Omega integrated fit.",
+    "Published fitted selectivity, retention, growth-deviation and composition-weight parameters are incomplete.",
+    "The public catch, CPUE and composition series are digitised from figures and therefore approximate."
+  ]
+}

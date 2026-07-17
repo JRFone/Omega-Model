@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, replace
 from functools import lru_cache
 from math import erf, exp, log, pi, sqrt
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 import numpy as np
 import pandas as pd
@@ -141,7 +141,7 @@ def life_history_arrays(settings: AgeStructuredSettings) -> dict[str, np.ndarray
     }
 
 
-def sector_curves(settings: AgeStructuredSettings, life_history: dict[str, np.ndarray] | None = None) -> dict[str, dict[str, np.ndarray]]:
+def sector_curves(settings: AgeStructuredSettings, life_history: dict[str, np.ndarray] | None = None) -> dict[str, dict[str, Any]]:
     life = life_history or life_history_arrays(settings)
     ages = life["age"]
     length = life["length_mm"]
@@ -158,6 +158,57 @@ def sector_curves(settings: AgeStructuredSettings, life_history: dict[str, np.nd
             "retained_fraction": retained_fraction,
             "released_fraction": released_fraction,
             "mortality_fraction": mortality_fraction,
+            "discard_mortality": float(np.clip(sector.discard_mortality, 0.0, 1.0)),
+            "fishing_power": float(max(sector.fishing_power, 0.0)),
+        }
+    return curves
+
+
+def _annual_sector_curves(
+    settings: AgeStructuredSettings,
+    life_history: dict[str, np.ndarray],
+    frame: pd.DataFrame,
+    row_index: int,
+) -> dict[str, dict[str, Any]]:
+    """Build sector curves with optional year-specific values from the dataset.
+
+    Supported columns are suffixed with the lower-case sector name, for example
+    ``retention_length50_recreational`` or
+    ``discard_mortality_charter``. Missing values retain the configured base
+    setting. This keeps historical regulation and fleet changes explicit in the
+    data rather than silently applying one curve to every year.
+    """
+
+    ages = life_history["age"]
+    length = life_history["length_mm"]
+
+    def value(column: str, default: float) -> float:
+        if column not in frame.columns:
+            return float(default)
+        raw = frame.iloc[row_index][column]
+        return float(raw) if pd.notna(raw) else float(default)
+
+    curves: dict[str, dict[str, Any]] = {}
+    for sector in settings.sectors:
+        suffix = sector.name.lower()
+        selectivity_a50 = value(f"selectivity_a50_{suffix}", sector.selectivity_a50)
+        selectivity_slope = value(f"selectivity_slope_{suffix}", sector.selectivity_slope)
+        retention_length50 = value(f"retention_length50_{suffix}", sector.retention_length50_mm)
+        retention_slope = value(f"retention_slope_{suffix}", sector.retention_slope_mm)
+        discard_mortality = float(np.clip(value(f"discard_mortality_{suffix}", sector.discard_mortality), 0.0, 1.0))
+        fishing_power = max(value(f"fishing_power_{suffix}", sector.fishing_power), 0.0)
+        selectivity = logistic(ages, selectivity_a50, selectivity_slope)
+        retention = logistic(length, retention_length50, retention_slope)
+        retained_fraction = selectivity * retention
+        released_fraction = selectivity * (1.0 - retention)
+        curves[sector.name] = {
+            "selectivity": selectivity,
+            "retention": retention,
+            "retained_fraction": retained_fraction,
+            "released_fraction": released_fraction,
+            "mortality_fraction": retained_fraction + released_fraction * discard_mortality,
+            "discard_mortality": discard_mortality,
+            "fishing_power": float(fishing_power),
         }
     return curves
 
@@ -253,9 +304,11 @@ def _annual_catch(
     total_target = max(sum(sector_shares.values()), _EPS)
     for sector in settings.sectors:
         share = max(float(sector_shares.get(sector.name, 0.0)) / total_target, 0.0)
-        encounter_f = max(float(f_scalar), 0.0) * share * max(sector.fishing_power, 0.0) * curves[sector.name]["selectivity"]
+        fishing_power = max(float(curves[sector.name].get("fishing_power", sector.fishing_power)), 0.0)
+        discard_mortality = float(np.clip(curves[sector.name].get("discard_mortality", sector.discard_mortality), 0.0, 1.0))
+        encounter_f = max(float(f_scalar), 0.0) * share * fishing_power * curves[sector.name]["selectivity"]
         land_f = encounter_f * curves[sector.name]["retention"]
-        discard_f = encounter_f * (1.0 - curves[sector.name]["retention"]) * np.clip(sector.discard_mortality, 0.0, 1.0)
+        discard_f = encounter_f * (1.0 - curves[sector.name]["retention"]) * discard_mortality
         sector_land_f[sector.name] = land_f
         sector_discard_f[sector.name] = discard_f
         sector_dead_f[sector.name] = land_f + discard_f
@@ -326,6 +379,16 @@ def _advance_numbers(survivors: np.ndarray, recruitment: float) -> np.ndarray:
 
 
 def _recruitment_multipliers(frame: pd.DataFrame) -> np.ndarray:
+    # Controlled operating-model and recovery tests sometimes need the exact
+    # annual multiplier that generated their known truth. Keep that explicit
+    # path separate from observational recruitment indices, which remain
+    # normalised by their median below.
+    if "recruitment_multiplier_absolute" in frame.columns:
+        raw = pd.to_numeric(frame["recruitment_multiplier_absolute"], errors="coerce").to_numpy(dtype=float)
+        multipliers = np.ones(len(frame), dtype=float)
+        valid = np.isfinite(raw) & (raw > 0)
+        multipliers[valid] = raw[valid]
+        return np.clip(multipliers, 0.05, 20.0)
     for column in ("recruitment_multiplier", "recruitment_index", "recruitment", "juvenile_index"):
         if column not in frame.columns:
             continue
@@ -344,6 +407,8 @@ def simulate_age_structured(
     dataset: StockDataset,
     settings: AgeStructuredSettings | None = None,
     recruitment_multipliers: np.ndarray | None = None,
+    cancel_check: Callable[[], bool] | None = None,
+    progress_callback: Callable[[float, str], None] | None = None,
 ) -> dict[str, Any]:
     config = settings or AgeStructuredSettings()
     frame = dataset.frame.reset_index(drop=True)
@@ -367,6 +432,11 @@ def simulate_age_structured(
     last_recruit_deviation = 0.0
 
     for year_index, year in enumerate(years):
+        if cancel_check is not None and cancel_check():
+            raise InterruptedError("Age-structured reconstruction was cancelled.")
+        if progress_callback is not None:
+            progress_callback(year_index / max(len(years), 1), f"Reconstructing year {int(year)}")
+        curves = _annual_sector_curves(config, life, frame, year_index)
         total_biomass = _total_biomass(numbers, life)
         ssb = _spawning_biomass(numbers, life, config)
         survey_biomass = _survey_biomass(numbers, life)
@@ -440,11 +510,14 @@ def simulate_age_structured(
         recruitment_next = expected_recruitment * multiplier
         numbers = _advance_numbers(catch_outcome["survivors"], recruitment_next)
 
+    if progress_callback is not None:
+        progress_callback(1.0, "Reconstruction complete")
+
     return {
         "settings": asdict(config),
         "life_history": {key: value.tolist() for key, value in life.items()},
         "sector_curves": {
-            sector: {key: values.tolist() for key, values in value.items()}
+            sector: {key: values.tolist() if isinstance(values, np.ndarray) else float(values) for key, values in value.items()}
             for sector, value in curves.items()
         },
         "b0": float(b0),
@@ -466,7 +539,10 @@ def _preserve_age_model_columns(base: StockDataset, raw: pd.DataFrame) -> StockD
     if year_column is None:
         return base
     extras = pd.DataFrame({"year": pd.to_numeric(raw[year_column], errors="coerce")})
-    allowed_prefixes = ("catch_", "recruitment", "juvenile", "environment", "temperature")
+    allowed_prefixes = (
+        "catch_", "recruitment", "juvenile", "environment", "temperature",
+        "selectivity_", "retention_", "discard_mortality_", "fishing_power_",
+    )
     for column in raw.columns:
         key = str(column).strip().lower()
         if column == year_column or not key.startswith(allowed_prefixes):
@@ -651,8 +727,9 @@ def _objective(
     settings: AgeStructuredSettings,
     age_composition: pd.DataFrame | None,
     length_composition: pd.DataFrame | None,
+    cancel_check: Callable[[], bool] | None = None,
 ) -> tuple[float, dict[str, Any]]:
-    simulation = simulate_age_structured(dataset, settings)
+    simulation = simulate_age_structured(dataset, settings, cancel_check=cancel_check)
     history = simulation["history"]
     frame = dataset.frame.reset_index(drop=True)
     index = frame["index"].to_numpy(dtype=float)
@@ -732,6 +809,8 @@ def fit_age_structured(
     fit_settings: AgeFitSettings | None = None,
     age_composition: pd.DataFrame | None = None,
     length_composition: pd.DataFrame | None = None,
+    cancel_check: Callable[[], bool] | None = None,
+    progress_callback: Callable[[float, str], None] | None = None,
 ) -> AgeStructuredResult:
     base = settings or AgeStructuredSettings()
     config = fit_settings or AgeFitSettings()
@@ -743,10 +822,21 @@ def fit_age_structured(
     population = rng.random((population_size, dimensions))
     scores = np.empty(population_size, dtype=float)
     details: list[dict[str, Any]] = []
+    total_evaluations = population_size + generations * population_size + max(config.local_rounds, 0) * dimensions * 2
+    completed_evaluations = 0
 
     def evaluate(unit: np.ndarray) -> tuple[float, dict[str, Any], AgeStructuredSettings]:
+        nonlocal completed_evaluations
+        if cancel_check is not None and cancel_check():
+            raise InterruptedError("Integrated age-structured fit was cancelled.")
         candidate = _decode_parameters(np.clip(unit, 0.0, 1.0), specs, base)
-        score, detail = _objective(dataset, candidate, age_composition, length_composition)
+        score, detail = _objective(dataset, candidate, age_composition, length_composition, cancel_check)
+        completed_evaluations += 1
+        if progress_callback is not None:
+            progress_callback(
+                completed_evaluations / max(total_evaluations, 1),
+                f"Fit evaluation {completed_evaluations} of {total_evaluations}",
+            )
         return float(score), detail, candidate
 
     candidate_settings: list[AgeStructuredSettings] = []
@@ -799,6 +889,9 @@ def fit_age_structured(
                     improved = True
         if not improved:
             step *= 0.5
+
+    if progress_callback is not None:
+        progress_callback(1.0, "Integrated fit complete")
 
     order = np.argsort(scores)
     ensemble: list[dict[str, float]] = []
@@ -937,6 +1030,8 @@ def _settings_from_result(result: AgeStructuredResult) -> AgeStructuredSettings:
 def project_age_structured(
     result: AgeStructuredResult,
     settings: AgeProjectionSettings | None = None,
+    cancel_check: Callable[[], bool] | None = None,
+    progress_callback: Callable[[float, str], None] | None = None,
 ) -> dict[str, Any]:
     config = settings or AgeProjectionSettings()
     model_settings = _settings_from_result(result)
@@ -959,6 +1054,10 @@ def project_age_structured(
     recruitment_sigma = model_settings.recruitment_sigma if config.recruitment_sigma is None else max(config.recruitment_sigma, 0.0)
 
     for iteration in range(iterations):
+        if cancel_check is not None and cancel_check():
+            raise InterruptedError("Age-structured projection was cancelled.")
+        if progress_callback is not None:
+            progress_callback(iteration / max(iterations, 1), f"Projection simulation {iteration + 1} of {iterations}")
         numbers = base_numbers.copy()
         rec_dev = 0.0
         for year_index, _year in enumerate(years):
@@ -988,6 +1087,9 @@ def project_age_structured(
             dead_discards[iteration, year_index] = outcome["total_dead_discard_biomass"]
             fishing_mortality[iteration, year_index] = f_scalar
             recruitments[iteration, year_index] = recruitment
+
+    if progress_callback is not None:
+        progress_callback(1.0, "Projection complete")
 
     rows: list[dict[str, float]] = []
     for year_index, year in enumerate(years):
@@ -1035,6 +1137,8 @@ def run_management_strategy_evaluation(
     years: int = 20,
     iterations: int = 250,
     seed: int = 11221,
+    cancel_check: Callable[[], bool] | None = None,
+    progress_callback: Callable[[float, str], None] | None = None,
 ) -> dict[str, Any]:
     model_settings = _settings_from_result(result)
     references = equilibrium_reference_points(model_settings)
@@ -1055,13 +1159,23 @@ def run_management_strategy_evaluation(
         )
     rows: list[dict[str, Any]] = []
     projections: dict[str, Any] = {}
-    for label, config in strategies:
-        projection = project_age_structured(result, config)
+    for strategy_index, (label, config) in enumerate(strategies):
+        if cancel_check is not None and cancel_check():
+            raise InterruptedError("Management strategy evaluation was cancelled.")
+
+        def strategy_progress(value: float, message: str) -> None:
+            if progress_callback is not None:
+                overall = (strategy_index + min(max(value, 0.0), 1.0)) / max(len(strategies), 1)
+                progress_callback(overall, f"{label}: {message}")
+
+        projection = project_age_structured(result, config, cancel_check, strategy_progress)
         risk = projection["risk_summary"]
         row = {"strategy": label, **risk}
         row["risk_adjusted_yield"] = row["median_annual_catch"] * max(0.0, 1.0 - row["prob_ever_below_limit"])
         rows.append(row)
         projections[label] = projection
+    if progress_callback is not None:
+        progress_callback(1.0, "Management strategy evaluation complete")
     pareto = _pareto_front(rows)
     return {
         "summary": {

@@ -1,0 +1,37 @@
+{
+  "display_name": "WA Dhufish \u2014 DPIRD public-evidence reconstruction",
+  "short_description": "Published parameters plus digitised official catch, CPUE and age-composition figures for transparent Omega stress testing.",
+  "species": "Glaucosoma hebraicum",
+  "source": "Western Australian Department of Primary Industries and Regional Development",
+  "source_url": "https://library.dpird.wa.gov.au/fish_rar/2/",
+  "model_type": "integrated age-structured public reconstruction",
+  "difficulty": "advanced",
+  "available_data": [
+    "retained catch",
+    "commercial CPUE",
+    "age compositions",
+    "published biological parameters"
+  ],
+  "required_files": [
+    "Omega_Ready/dpird_wa_dhufish_public_reconstruction.csv",
+    "Omega_Ready/age_composition.csv",
+    "Omega_Ready/parameter_register.csv"
+  ],
+  "supported_workflows": [
+    "integrated assessment",
+    "sensitivity analysis",
+    "retrospective",
+    "ASPM-style comparison"
+  ],
+  "recommended_first_action": "Read README.md and review parameter_register.csv evidence_class before fitting.",
+  "original_or_working_copy": "public reconstruction; original PDFs preserved",
+  "raw_dpird_dataset": false,
+  "validation_checks": [
+    "2024 vector-extracted retained catch 136.83 t agrees with the published rounded 137 t",
+    "Primary daily CPUE composite is normalised to 1.0 in 2008",
+    "All area age compositions sum to 1.0",
+    "All pooled age compositions sum to 1.0",
+    "All available area catch components reconcile to annual sector totals",
+    "Digitised Figure 3.21 terminal WCB relative spawning biomass is 0.149, consistent with published 0.15"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "omega-age-structured-demonstration",
+  "display_name": "Omega Age-Structured Demonstration",
+  "description": "A small teaching dataset with catch, abundance index, direct biomass observations, sector catches, recruitment multipliers, and age and length composition examples.",
+  "source": "Omega",
+  "difficulty": "Beginner",
+  "model_type": "Age structured",
+  "primary_file": "model_ready_timeseries.csv",
+  "age_composition": "age_composition.csv",
+  "length_composition": "length_composition.csv",
+  "data_types": [
+    "catch",
+    "CPUE/index",
+    "biomass",
+    "age",
+    "length",
+    "sector catch",
+    "recruitment"
+  ],
+  "recommended_first_action": "Start the in-window Watch Omega Run a Complete Model tutorial.",
+  "original": true
+}

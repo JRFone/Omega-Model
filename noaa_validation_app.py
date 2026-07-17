@@ -33,6 +33,35 @@ CACHE_ROOT = ROOT / "validation_cache" / "noaa_ss3"
 REPORT_ROOT = ROOT / "reports" / "noaa_validation"
 
 
+def comparison_rows(payload: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Present every NOAA reference check beside Omega's independently calculated value."""
+
+    rows: list[dict[str, Any]] = []
+    for check in payload.get("checks", []):
+        expected = check.get("expected")
+        actual = check.get("actual")
+        difference = check.get("difference")
+        tolerance = check.get("tolerance")
+        if difference is None:
+            difference = "exact match" if check.get("status") == "PASS" else "different"
+        if tolerance is None:
+            tolerance = "exact"
+        comparison_type = "structural reference" if isinstance(expected, bool) else "NOAA reference value"
+        rows.append(
+            {
+                "comparison": check.get("name", "Unnamed check"),
+                "NOAA_reference": expected,
+                "Omega_result": actual,
+                "difference": difference,
+                "allowed_difference": tolerance,
+                "verdict": check.get("status", "UNKNOWN"),
+                "quick_visual": "MATCHES REFERENCE" if check.get("status") == "PASS" else "MISMATCH — INSPECT",
+                "evidence": check.get("detail") or f"{comparison_type}; {check.get('category', 'general')}",
+            }
+        )
+    return rows
+
+
 class MetricCard(ttk.Frame):
     def __init__(self, parent, title: str, value: str = "—", subtitle: str = "") -> None:
         super().__init__(parent, padding=(16, 12), style="Card.TFrame")
@@ -133,13 +162,12 @@ class NOAAValidationApp:
             style="HeaderSub.TLabel",
         ).pack(anchor="w", pady=(4, 0))
 
-        body = ttk.Frame(shell, style="App.TFrame")
+        body = ttk.Panedwindow(shell, orient="horizontal")
         body.pack(fill=BOTH, expand=True)
+        self.workspace_pane = body
 
         sidebar = ttk.Frame(body, style="Sidebar.TFrame", padding=(18, 18), width=310)
-        sidebar.pack(side=LEFT, fill=Y)
-        sidebar.pack_propagate(False)
-        ttk.Label(sidebar, text="Validation target", style="SideTitle.TLabel").pack(anchor="w")
+        ttk.Label(sidebar, text="1. NOAA model data", style="SideTitle.TLabel").pack(anchor="w")
         ttk.Label(sidebar, text="Official NOAA SS3 test model", style="SideText.TLabel").pack(anchor="w", pady=(2, 6))
         model_box = ttk.Combobox(sidebar, textvariable=self.model_var, values=tuple(NOAA_MODEL_CATALOG), state="readonly")
         model_box.pack(fill=X)
@@ -149,18 +177,28 @@ class NOAAValidationApp:
         ttk.Label(sidebar, text="Model folder", style="SideTitle.TLabel").pack(anchor="w")
         ttk.Entry(sidebar, textvariable=self.folder_var).pack(fill=X, pady=(5, 5))
         ttk.Button(sidebar, text="Choose local SS3 folder", command=self.choose_folder).pack(fill=X, pady=2)
-        ttk.Button(sidebar, text="Download selected NOAA model", command=self.download_selected).pack(fill=X, pady=2)
+        self.download_model_button = ttk.Button(sidebar, text="Download selected NOAA model", command=self.download_selected)
+        self.download_model_button.pack(fill=X, pady=2)
         ttk.Button(sidebar, text="Use embedded Simple fixture", command=self.use_fixture).pack(fill=X, pady=2)
 
         ttk.Separator(sidebar).pack(fill=X, pady=14)
-        ttk.Label(sidebar, text="Native SS3 executable", style="SideTitle.TLabel").pack(anchor="w")
-        ttk.Label(sidebar, text="Optional. Enables a real SS3 run in a temporary folder.", style="SideText.TLabel", wraplength=270).pack(anchor="w", pady=(2, 5))
+        ttk.Label(sidebar, text="2. Official SS3 program", style="SideTitle.TLabel").pack(anchor="w")
+        ttk.Label(sidebar, text="Optional. Select it to run NOAA's program as well as Omega's checks.", style="SideText.TLabel", wraplength=270).pack(anchor="w", pady=(2, 5))
         ttk.Entry(sidebar, textvariable=self.executable_var).pack(fill=X, pady=(0, 5))
         ttk.Button(sidebar, text="Choose SS3 executable", command=self.choose_executable).pack(fill=X, pady=2)
-        ttk.Button(sidebar, text="Download official SS3 executable", command=self.download_ss3_executable).pack(fill=X, pady=2)
+        self.download_executable_button = ttk.Button(sidebar, text="Download official SS3 executable", command=self.download_ss3_executable)
+        self.download_executable_button.pack(fill=X, pady=2)
 
         ttk.Separator(sidebar).pack(fill=X, pady=14)
-        ttk.Button(sidebar, text="RUN VALIDATION", style="Primary.TButton", command=self.run_validation).pack(fill=X, pady=(0, 5))
+        ttk.Label(sidebar, text="3. Run and compare", style="SideTitle.TLabel").pack(anchor="w")
+        ttk.Label(
+            sidebar,
+            text="Runs the selected NOAA data through Omega and opens every reference answer beside Omega's result.",
+            style="SideText.TLabel",
+            wraplength=270,
+        ).pack(anchor="w", pady=(2, 6))
+        self.run_compare_button = ttk.Button(sidebar, text="RUN NOAA DATA + COMPARE", style="Primary.TButton", command=self.run_validation)
+        self.run_compare_button.pack(fill=X, pady=(0, 5))
         ttk.Button(sidebar, text="Export HTML + JSON report", command=self.export_report).pack(fill=X, pady=2)
         ttk.Button(sidebar, text="Open NOAA source repository", command=lambda: webbrowser.open(NOAA_REPOSITORY_URL)).pack(fill=X, pady=2)
         ttk.Button(sidebar, text="Open report folder", command=self.open_report_folder).pack(fill=X, pady=2)
@@ -177,7 +215,9 @@ class NOAAValidationApp:
         ).pack(anchor="w", pady=(12, 0))
 
         main = ttk.Frame(body, style="App.TFrame", padding=(18, 14))
-        main.pack(side=RIGHT, fill=BOTH, expand=True)
+        body.add(sidebar, weight=0)
+        body.add(main, weight=1)
+        self.root.after(120, lambda: self._set_sidebar_width(310))
 
         cards = ttk.Frame(main, style="App.TFrame")
         cards.pack(fill=X)
@@ -189,12 +229,13 @@ class NOAAValidationApp:
         self.check_card.grid(row=0, column=1, sticky="nsew", padx=8)
         self.parity_card = MetricCard(cards, "Feature parity", "—", "Implemented vs NOAA model features")
         self.parity_card.grid(row=0, column=2, sticky="nsew", padx=8)
-        self.native_card = MetricCard(cards, "Native SS3 run", "NOT RUN", "Select an SS3 executable for direct execution")
+        self.native_card = MetricCard(cards, "Official SS3 run", "NOT RUN", "Select NOAA's SS3 executable for a direct run")
         self.native_card.grid(row=0, column=3, sticky="nsew", padx=(8, 0))
 
         ttk.Label(main, text="Validation workspace", style="Section.TLabel").pack(anchor="w", pady=(16, 8))
         self.tabs = ttk.Notebook(main)
         self.tabs.pack(fill=BOTH, expand=True)
+        self.comparison_tab = ttk.Frame(self.tabs, padding=8)
         self.overview_tab = ttk.Frame(self.tabs, padding=12)
         self.checks_tab = ttk.Frame(self.tabs, padding=8)
         self.capability_tab = ttk.Frame(self.tabs, padding=8)
@@ -203,6 +244,7 @@ class NOAAValidationApp:
         self.native_tab = ttk.Frame(self.tabs, padding=8)
         self.raw_tab = ttk.Frame(self.tabs, padding=8)
         for frame, title in [
+            (self.comparison_tab, "NOAA vs Omega"),
             (self.overview_tab, "Overview"),
             (self.checks_tab, "Checks"),
             (self.capability_tab, "Feature parity"),
@@ -213,6 +255,16 @@ class NOAAValidationApp:
         ]:
             self.tabs.add(frame, text=title)
 
+        self.comparison_intro = StringVar(
+            value="Click RUN NOAA DATA + COMPARE. Each NOAA reference answer will appear beside Omega's result, difference, tolerance, and verdict."
+        )
+        ttk.Label(
+            self.comparison_tab,
+            textvariable=self.comparison_intro,
+            wraplength=1050,
+            justify="left",
+        ).pack(anchor="w", fill=X, padx=4, pady=(2, 10))
+        self.comparison_tree = self._tree(self.comparison_tab)
         self.chart = BarSummary(self.overview_tab)
         self.chart.pack(fill=X, pady=(0, 12))
         self.overview_tree = self._tree(self.overview_tab)
@@ -228,6 +280,13 @@ class NOAAValidationApp:
         self.raw_text.pack(fill=BOTH, expand=True)
 
         ttk.Label(shell, textvariable=self.status, style="Status.TLabel").pack(side="bottom", fill=X)
+
+    def _set_sidebar_width(self, width: int) -> None:
+        try:
+            maximum = max(240, self.workspace_pane.winfo_width() - 620)
+            self.workspace_pane.sashpos(0, max(240, min(width, maximum)))
+        except Exception:
+            pass
 
     @staticmethod
     def _tree(parent) -> ttk.Treeview:
@@ -275,7 +334,7 @@ class NOAAValidationApp:
             self.folder_var.set(str(fixture))
         else:
             self.folder_var.set(str(cached))
-        self.capability_card.value_var.set("NOT RUN")
+        self.parity_card.value_var.set("NOT RUN")
         self.status.set(f"Selected NOAA model {model}.")
 
     def choose_folder(self) -> None:
@@ -353,7 +412,7 @@ class NOAAValidationApp:
             self._apply_result(self.result)
 
         self._background(
-            f"Validating {model}...",
+            f"Running NOAA data and comparing Omega results for {model}...",
             lambda: validate_model_directory(folder, model_name=model, native_executable=executable),
             complete,
         )
@@ -378,7 +437,21 @@ class NOAAValidationApp:
             self.native_card.subtitle_var.set(f"Return code {native.get('return_code')}; Report.sso: {native.get('report_created')}")
         else:
             self.native_card.value_var.set("NOT RUN")
-            self.native_card.subtitle_var.set("Choose an SS3 executable for direct execution")
+            self.native_card.subtitle_var.set("Omega comparison ran; choose NOAA's SS3 executable for a direct SS3 run too")
+
+        rows = comparison_rows(payload)
+        self._fill(self.comparison_tree, rows)
+        native_text = (
+            f"Official NOAA SS3 executable: {native.get('status', 'UNKNOWN')} (return code {native.get('return_code')}). "
+            if native
+            else "Official NOAA SS3 executable: not run. The table still compares the pinned NOAA reference values with Omega's answers. "
+        )
+        self.comparison_intro.set(
+            native_text
+            + f"Omega matched {passed} of {total} selected parser and deterministic-equation checks. "
+            + "This is visible, reproducible evidence, but it is not a claim of full SS3 numerical equivalence."
+        )
+        self.tabs.select(self.comparison_tab)
 
         failures = total - passed
         partial = sum(row.get("omega_status") == "partial" for row in payload.get("capability_matrix", []))
@@ -427,7 +500,7 @@ class NOAAValidationApp:
         self._fill(self.native_tree, native_rows)
         self.raw_text.delete("1.0", END)
         self.raw_text.insert("1.0", json.dumps(payload, indent=2, default=str))
-        self.status.set(f"Validation complete: {status}; {passed}/{total} checks passed; {parity}/{parity_total} features at parity.")
+        self.status.set(f"Comparison complete: {status}; {passed}/{total} NOAA reference checks matched. The NOAA vs Omega tab is open.")
 
     def export_report(self) -> None:
         if not self.result:

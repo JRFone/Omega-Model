@@ -23,6 +23,7 @@ from stock_model.ss3_validation import (
     write_validation_report,
     download_latest_ss3_executable,
 )
+from noaa_validation_app import comparison_rows
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -92,6 +93,20 @@ class NOAAValidationTests(unittest.TestCase):
         self.assertEqual(result.source_mode, "embedded_fixture")
         self.assertEqual(result.summary["checks_failed"], 0)
         self.assertGreaterEqual(result.summary["checks_passed"], 30)
+
+    def test_noaa_comparison_exposes_both_answers_and_tolerance(self) -> None:
+        from dataclasses import asdict
+
+        result = validate_model_directory(FIXTURE, model_name="Simple")
+        rows = comparison_rows(asdict(result))
+        self.assertEqual(len(rows), result.summary["checks_total"])
+        start_year = next(row for row in rows if row["comparison"] == "Start year")
+        self.assertEqual(start_year["NOAA_reference"], 1971)
+        self.assertEqual(start_year["Omega_result"], 1971)
+        self.assertEqual(start_year["verdict"], "PASS")
+        numeric = next(row for row in rows if row["comparison"] == "Converted Linf")
+        self.assertIn("difference", numeric)
+        self.assertIn("allowed_difference", numeric)
 
     def test_validation_report_export(self) -> None:
         result = validate_model_directory(FIXTURE, model_name="Simple")

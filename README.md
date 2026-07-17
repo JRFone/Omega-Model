@@ -34,10 +34,42 @@ The exact root-level development launch command is:
 .\.venv\Scripts\python.exe omega_desktop.py
 ```
 
-`Start_Omega_FISH_Model.bat` launches the same desktop application and prefers the local virtual environment. Individual workspaces can also be opened directly, for example:
+`Launch Omega FISH Model.bat` launches the same application and prefers the
+local virtual environment. Run `CREATE_DESKTOP_SHORTCUT.bat` once to create the
+**Omega FISH Model** Windows Desktop shortcut.
+
+The default application is a single-window shell with Back, Forward, Home,
+an adjustable and mouse-wheel-scrollable sidebar, a quick dataset dropdown,
+main-content scrolling, dark/light/high-contrast themes, and optional detachable
+workspaces. **Settings** is at the bottom of the sidebar and can move the sidebar
+to the left, top, right, or bottom. **RESET DEFAULTS** restores the standard
+realistic workload and display settings. Select
+**Guided practice** for a required-click tour that highlights each real control,
+or **WATCH A COMPLETE MODEL** for an automatic in-window demonstration
+that loads the protected beginner dataset and completes a short, real
+age-structured teaching fit. **FULL AUTO RUN** uses the active dataset and starts
+the complete automatic expert workflow, running every check supported by its
+available inputs while retaining warnings and failures.
+
+Long-running fits, diagnostics, downloads, projections and optimizations show a
+bottom processing bar. The sidebar **Error Log** keeps callback and workspace
+failures visible. Right-clicking a chart, dataset table, result table, slider or
+workspace background opens actions relevant to that part of the interface.
+Integrated Assessment control groups are collapsible, and both the control
+panel and main workspace support mouse-wheel scrolling.
+
+Open **Visual Parameter Lab** to move carrying-capacity, growth, starting-biomass,
+natural mortality, recruitment strength/variability, fishing pressure,
+catchability and observation-error sliders. Its biomass chart updates
+immediately, displays the selected uncertainty range, and overlays observed
+biomass or a visibly rescaled abundance index when available. The lab is a
+deterministic scenario explorer, not a fitted parameter estimate or accuracy
+claim. Individual workspaces can still be detached or
+opened directly, for example:
 
 ```powershell
 .\.venv\Scripts\python.exe omega_desktop.py --mode integrated
+.\.venv\Scripts\python.exe omega_desktop.py --mode parameters
 .\.venv\Scripts\python.exe omega_desktop.py --mode truthmse
 .\.venv\Scripts\python.exe omega_desktop.py --mode priority
 .\.venv\Scripts\python.exe omega_desktop.py --mode noaa
@@ -88,12 +120,58 @@ This validates the supplied starter, data, and control files and exercises repor
 
 Review [NOAA_VALIDATION.md](NOAA_VALIDATION.md) for the evidence levels and remaining parity gaps before interpreting a comparison.
 
+## Dataset and NOAA test-model library
+
+Omega discovers model inputs below `Data_Sets/` and displays them in the
+in-application Dataset Library. Each Omega dataset may include an
+`omega_dataset.json` file describing its source, difficulty, inputs, and
+scientific purpose. Original inputs are not modified by the single-window
+workflow.
+
+Use the header dropdown for a quick selection or **BROWSE DATASETS** for the
+searchable library and its difficulty and coverage filters. **Omega Complete
+Demonstration / Diagnostics Reference (Known Simulation)** is the packaged
+full-input dataset for all native Omega workspaces. In addition to annual,
+age-composition and length-composition inputs, it includes chart-ready examples
+for optimizer grids, retrospective peels, likelihood profiles, coverage and MSE.
+It is synthetic software test data, not evidence about a real stock. NOAA/SS3
+validation uses the separately packaged official NOAA Simple configuration.
+
+The Dataset Library also includes the **WA Dhufish — DPIRD public-evidence
+reconstruction**. It preserves the official publications and labels
+vector-extracted or digitised series as approximations; it is not represented as
+the unpublished raw DPIRD assessment dataset.
+
+The **Quick model health** tab in Priority Diagnostics wraps long explanations
+and presents the quick verdict, accuracy evidence, confounding risk, reason, and
+next action in separate readable columns. “Accurate” is reserved for known-truth
+recovery evidence; a successful software run alone is not described as accurate.
+
+In **NOAA / SS3**, click **RUN NOAA DATA + COMPARE**. The **NOAA vs Omega** tab
+shows each pinned NOAA reference answer beside Omega's result, difference,
+tolerance, and verdict. Selecting an official SS3 executable additionally runs
+NOAA's program; the table alone is not a claim of full SS3 numerical parity.
+
+Download or refresh the current official NOAA/NMFS Stock Synthesis test models
+and user examples from inside the Dataset Library, or run:
+
+```powershell
+.\.venv\Scripts\python.exe tools\download_noaa_test_data.py --refresh
+```
+
+The large snapshots are stored locally under `Data_Sets/NOAA/_sources/` and are
+excluded from Git. `NOAA_SOURCE_MANIFEST.json` records the exact repository
+commit SHAs, and the CSV/JSON catalogues describe the model folders discovered
+in those snapshots.
+
 ## Repository structure
 
 - `stock_model/` — assessment, diagnostics, MSE, chart, SS3, and native-loader modules
 - `native/` — C++17 native engine, headers, CMake configuration, and native tests
 - `tests/` — Python unit, integration, parity, validation, and release-readiness tests
-- `Data_Sets/` — demonstration datasets
+- `Data_Sets/` — Omega demonstrations, local NOAA test models, and dataset metadata
+- `ui/` — single-window shell support, dataset discovery, themes, and tutorials
+- `tools/` — reproducible NOAA downloader and Windows shortcut utilities
 - `validation_data/` — pinned NOAA/SS3 validation fixtures
 - `assets/` — application icon and packaged assets
 - `installer/` — Inno Setup source; not required for development installation

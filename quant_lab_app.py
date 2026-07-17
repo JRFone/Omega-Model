@@ -7,12 +7,14 @@ import threading
 import traceback
 import webbrowser
 from pathlib import Path
-from tkinter import BOTH, END, LEFT, RIGHT, TOP, X, Y, Canvas, StringVar, Tk, filedialog, messagebox
+from queue import Empty, Queue
+from tkinter import BOTH, BOTTOM, END, LEFT, RIGHT, TOP, X, Y, BooleanVar, Canvas, StringVar, Tk, filedialog, messagebox
 from tkinter import ttk
 from typing import Any, Callable
 
 import numpy as np
 
+from chart_studio_app import NativeChartPreview, ScrollFrame
 from stock_model.core import ModelSettings, ProjectionSettings, fit, project
 from stock_model.data_io import StockDataset, read_stock_file
 from stock_model.quant_lab import (
@@ -33,6 +35,7 @@ from stock_model.quant_validation import (
     run_optimizer_agreement,
     run_walk_forward_validation,
 )
+from stock_model.interactive_charts import ChartProfile, InteractiveChartFactory, SeriesSpec
 
 
 APP_TITLE = "Omega FISH Model — Quant Lab"
@@ -58,6 +61,8 @@ class QuantLabApp:
         self.full_output: dict[str, Any] | None = None
         self.surface_rows: list[dict[str, Any]] = []
         self.surface_angle = 42.0
+        self.busy = BooleanVar(value=False)
+        self.processing_text = StringVar(value="")
         self.status = StringVar(value="Load a CSV or Excel dataset containing at least year and catch.")
         self.model = StringVar(value="schaefer")
         self.algorithm = StringVar(value="differential_evolution")
@@ -81,10 +86,18 @@ class QuantLabApp:
         ttk.Button(toolbar, text="Open Validation and MSE", command=self.open_existing_interface).pack(side=LEFT, padx=8)
         ttk.Label(toolbar, textvariable=self.status).pack(side=LEFT, padx=12)
 
+        self.processing_strip = ttk.Frame(self.root, padding=(10, 5))
+        ttk.Label(self.processing_strip, textvariable=self.processing_text).pack(side=LEFT, padx=(0, 10))
+        self.processing_bar = ttk.Progressbar(self.processing_strip, mode="indeterminate", length=360)
+        self.processing_bar.pack(side=LEFT, fill=X, expand=True)
+
         body = ttk.Panedwindow(self.root, orient="horizontal")
+        self.body = body
         body.pack(fill=BOTH, expand=True)
-        controls = ttk.Frame(body, padding=10, width=290)
-        body.add(controls, weight=0)
+        controls_shell = ScrollFrame(body, width=310)
+        body.add(controls_shell, weight=0)
+        controls = controls_shell.inner
+        self.controls_scroll = controls_shell
         main = ttk.Frame(body, padding=6)
         body.add(main, weight=1)
 
@@ -102,7 +115,7 @@ class QuantLabApp:
         ttk.Button(controls, text="Cross-model ensemble", command=self.run_model_ensemble_ui).pack(fill=X, pady=3)
         ttk.Button(controls, text="Walk-forward validation", command=self.run_walk_forward_ui).pack(fill=X, pady=3)
         ttk.Button(controls, text="8D diagnostic explorer", command=self.show_high_dimensional).pack(fill=X, pady=3)
-        ttk.Button(controls, text="3D r-K objective surface", command=self.run_surface).pack(fill=X, pady=3)
+        ttk.Button(controls, text="Optimization grid (MetaTrader style)", command=self.run_surface).pack(fill=X, pady=3)
         ttk.Button(controls, text="Genetic HCR risk frontier", command=self.run_risk).pack(fill=X, pady=3)
         ttk.Button(controls, text="Stress-test data", command=self.run_stress).pack(fill=X, pady=3)
         ttk.Button(controls, text="Sensitivity / Sobol screen", command=self.run_sobol).pack(fill=X, pady=3)
@@ -141,7 +154,7 @@ class QuantLabApp:
             (self.ensemble_tab, "Model Ensemble"),
             (self.validation_tab, "Walk-Forward"),
             (self.highd_tab, "8D Diagnostics"),
-            (self.surface_tab, "3D Surface"),
+            (self.surface_tab, "Optimization Grid"),
             (self.risk_tab, "Risk Frontier"),
             (self.stress_tab, "Stress Tests"),
             (self.sobol_tab, "Sensitivity"),
@@ -151,7 +164,15 @@ class QuantLabApp:
 
         self.data_tree = self._tree(self.data_tab)
         self.fit_tree = self._tree(self.fit_tab)
-        self.optimizer_tree = self._tree(self.optimizer_tab)
+        optimizer_split = ttk.Panedwindow(self.optimizer_tab, orient="vertical")
+        optimizer_split.pack(fill=BOTH, expand=True)
+        optimizer_chart = ttk.LabelFrame(optimizer_split, text="Ranked objective values")
+        optimizer_table = ttk.LabelFrame(optimizer_split, text="Candidate parameter sets")
+        optimizer_split.add(optimizer_chart, weight=1)
+        optimizer_split.add(optimizer_table, weight=2)
+        self.optimizer_preview = NativeChartPreview(optimizer_chart)
+        self.optimizer_preview.pack(fill=BOTH, expand=True)
+        self.optimizer_tree = self._tree(optimizer_table)
         self.agreement_tree = self._tree(self.agreement_tab)
         self.ensemble_tree = self._tree(self.ensemble_tab)
         self.validation_tree = self._tree(self.validation_tab)
@@ -165,7 +186,15 @@ class QuantLabApp:
         ident_frame = ttk.LabelFrame(highd_tables, text="Local curvature, profiles and weak directions")
         highd_tables.add(ident_frame, weight=1)
         self.identifiability_tree = self._tree(ident_frame)
-        self.surface_canvas = Canvas(self.surface_tab, background="white")
+        self.surface_views = ttk.Notebook(self.surface_tab)
+        self.surface_views.pack(fill=BOTH, expand=True)
+        surface_grid_tab = ttk.Frame(self.surface_views)
+        surface_3d_tab = ttk.Frame(self.surface_views)
+        self.surface_views.add(surface_grid_tab, text="Parameter grid")
+        self.surface_views.add(surface_3d_tab, text="Rotatable 3D")
+        self.surface_preview = NativeChartPreview(surface_grid_tab)
+        self.surface_preview.pack(fill=BOTH, expand=True)
+        self.surface_canvas = Canvas(surface_3d_tab, background="white")
         self.surface_canvas.pack(fill=BOTH, expand=True)
         self.surface_canvas.bind("<Configure>", lambda _event: self.draw_surface())
         self.surface_canvas.bind("<ButtonPress-1>", self._surface_drag_start)
@@ -235,26 +264,61 @@ class QuantLabApp:
         return self.dataset
 
     def _run_background(self, label: str, work: Callable[[], Any], done: Callable[[Any], None]) -> None:
+        if self.busy.get():
+            self.status.set(f"Still processing: {self.processing_text.get()}")
+            return
+        self.busy.set(True)
+        self.processing_text.set(label)
+        self.processing_strip.pack(side=BOTTOM, fill=X, before=self.body)
+        self.processing_bar.start(12)
         self.status.set(label)
+        outcome: Queue[tuple[str, Any]] = Queue(maxsize=1)
 
         def target() -> None:
             try:
-                result = work()
-                self.root.after(0, lambda: self._finish_background(done, result, label))
+                outcome.put(("ok", work()))
             except Exception:
-                trace = traceback.format_exc()
-                self.root.after(0, lambda: self._fail_background(label, trace))
+                outcome.put(("error", traceback.format_exc()))
+
+        def poll() -> None:
+            try:
+                state, value = outcome.get_nowait()
+            except Empty:
+                try:
+                    if self.root.winfo_exists():
+                        self.root.after(30, poll)
+                except Exception:
+                    pass
+                return
+            if state == "ok":
+                self._finish_background(done, value, label)
+            else:
+                self._fail_background(label, str(value))
 
         threading.Thread(target=target, daemon=True).start()
+        self.root.after(30, poll)
 
     def _finish_background(self, done: Callable[[Any], None], result: Any, label: str) -> None:
-        done(result)
-        self.status.set(label.replace("Running", "Completed"))
+        try:
+            done(result)
+            self.status.set(label.replace("Running", "Completed"))
+        finally:
+            self._stop_processing()
 
     def _fail_background(self, label: str, trace: str) -> None:
         self.log(trace)
         self.status.set(f"Failed: {label}")
+        self._stop_processing()
+        shell = getattr(self.root, "omega_shell", None)
+        if shell is not None:
+            shell.log_error(label, RuntimeError(trace.splitlines()[-1] if trace.splitlines() else label), trace)
         messagebox.showerror(APP_TITLE, trace.splitlines()[-1] if trace.splitlines() else trace)
+
+    def _stop_processing(self) -> None:
+        self.processing_bar.stop()
+        self.processing_strip.pack_forget()
+        self.processing_text.set("")
+        self.busy.set(False)
 
     def run_baseline(self) -> None:
         try:
@@ -296,6 +360,15 @@ class QuantLabApp:
         for row in output.get("candidates", [])[:200]:
             rows.append({key: value for key, value in row.items() if key != "objective_components"})
         self._populate_tree(self.optimizer_tree, rows)
+        objectives = [float(row["objective"]) for row in rows if row.get("objective") is not None]
+        if objectives:
+            figure = InteractiveChartFactory(ChartProfile()).time_series(
+                [SeriesSpec("Objective", list(range(1, len(objectives) + 1)), objectives, mode="lines+markers")],
+                title="Optimizer candidates ranked from best to worst",
+                x_title="Candidate rank",
+                y_title="Objective (lower is better)",
+            )
+            self.optimizer_preview.show_figure(figure, "Optimizer candidates ranked from best to worst", "Candidate rank", "Objective")
         self.notebook.select(self.optimizer_tab)
         self.log(json.dumps({"optimizer_summary": output.get("summary"), "best": rows[0] if rows else {}}, indent=2, default=str))
 
@@ -420,22 +493,46 @@ class QuantLabApp:
     def run_surface(self) -> None:
         try:
             dataset = self._require_dataset()
-            if not self.optimizer_output:
-                raise ValueError("Run the global optimiser first so the surface can be sliced through the best 8D candidate.")
-            best = self.optimizer_output["candidates"][0]
+            config = QuantOptimizerSettings(
+                algorithm=self.algorithm.get(),
+                population=max(12, int(self.population.get())),
+                generations=max(1, int(self.generations.get())),
+            )
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
             return
+
+        def work():
+            optimizer = self.optimizer_output or run_global_optimizer(dataset, self._settings(), config)
+            best = optimizer["candidates"][0]
+            return optimizer, objective_surface(dataset, self._settings(), best, points=20)
+
         self._run_background(
-            "Running 3D objective surface...",
-            lambda: objective_surface(dataset, self._settings(), best, points=18),
-            self._show_surface,
+            "Running optimization and parameter grid...",
+            work,
+            self._show_surface_package,
         )
+
+    def _show_surface_package(self, value) -> None:
+        optimizer, rows = value
+        if self.optimizer_output is None:
+            self._show_optimizer(optimizer)
+        self._show_surface(rows)
 
     def _show_surface(self, rows) -> None:
         self.surface_rows = rows
+        figure = InteractiveChartFactory(ChartProfile()).optimization_surface(
+            rows,
+            x_key="r",
+            y_key="k",
+            value_key="objective_delta",
+            maximize=False,
+            title="r × K optimization grid — star marks the best cell",
+        )
+        self.surface_preview.show_figure(figure, "r × K optimization grid — star marks the best cell", "Growth rate r", "Carrying capacity K")
         self.draw_surface()
         self.notebook.select(self.surface_tab)
+        self.surface_views.select(0)
 
     def run_risk(self) -> None:
         try:

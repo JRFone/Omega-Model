@@ -6,7 +6,8 @@ import threading
 import traceback
 import webbrowser
 from pathlib import Path
-from tkinter import BOTH, END, LEFT, RIGHT, TOP, X, Y, BooleanVar, StringVar, Tk, filedialog, messagebox
+from queue import Empty, Queue
+from tkinter import BOTH, END, LEFT, RIGHT, TOP, X, Y, BooleanVar, Canvas, StringVar, Tk, filedialog, messagebox
 from tkinter import ttk
 from typing import Any, Mapping
 
@@ -18,6 +19,7 @@ from stock_model.data_io import read_stock_file
 from stock_model.age_structured import read_composition_file
 from stock_model.expert_workflow import ExpertWorkflowSettings, WorkflowOverride, run_expert_workflow
 from stock_model.interactive_charts import ChartProfile, ChartProfileStore, InteractiveChartFactory, SeriesSpec
+from chart_studio_app import NativeChartPreview
 
 
 APP_TITLE = "Omega FISH Model — Automatic Expert Workflow"
@@ -37,6 +39,48 @@ class MetricCard(ttk.Frame):
         ttk.Label(self, textvariable=self.subtitle, style="CardSub.TLabel", wraplength=230).pack(anchor="w")
 
 
+class ScrollFrame(ttk.Frame):
+    def __init__(self, parent, *, width: int = 330) -> None:
+        super().__init__(parent, width=width, style="Sidebar.TFrame")
+        self.pack_propagate(False)
+        self.canvas = Canvas(self, width=width - 18, highlightthickness=0, background="#102a43")
+        self.canvas.omega_role = "workspace_controls"  # type: ignore[attr-defined]
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.inner = ttk.Frame(self.canvas, style="Sidebar.TFrame", padding=(18, 16))
+        self.window = self.canvas.create_window((0, 0), window=self.inner, anchor="nw")
+        self.inner.bind("<Configure>", lambda _event: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.canvas.bind("<Configure>", lambda event: self.canvas.itemconfigure(self.window, width=event.width))
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.canvas.pack(side=LEFT, fill=BOTH, expand=True)
+        self.scrollbar.pack(side=RIGHT, fill=Y)
+        self.bind_all("<MouseWheel>", self._wheel, add="+")
+        self.bind_all("<Button-4>", self._wheel, add="+")
+        self.bind_all("<Button-5>", self._wheel, add="+")
+
+    def _wheel(self, event):
+        try:
+            current = getattr(event, "widget", None)
+            inside = False
+            while current is not None:
+                if current in {self, self.canvas, self.inner}:
+                    inside = True
+                    break
+                current = getattr(current, "master", None)
+            pointer_x = self.winfo_pointerx()
+            pointer_y = self.winfo_pointery()
+            inside = inside or (
+                self.canvas.winfo_rootx() <= pointer_x < self.canvas.winfo_rootx() + self.canvas.winfo_width()
+                and self.canvas.winfo_rooty() <= pointer_y < self.canvas.winfo_rooty() + self.canvas.winfo_height()
+            )
+            if not inside:
+                return None
+            direction = -1 if getattr(event, "delta", 0) > 0 or getattr(event, "num", 0) == 4 else 1
+            self.canvas.yview_scroll(direction * 3, "units")
+            return "break"
+        except Exception:
+            return None
+
+
 class ExpertWorkflowApp:
     def __init__(self, root: Tk) -> None:
         self.root = root
@@ -51,8 +95,12 @@ class ExpertWorkflowApp:
         self.override_reason = StringVar(value="")
         self.chart_profile = StringVar(value="Omega default")
         self.status = StringVar(value="Ready. Automatic mode runs every implemented expert diagnostic and records failures.")
+        self.report_chart_name = StringVar(value="")
         self.result: dict[str, Any] | None = None
         self.dashboard_path: Path | None = None
+        self.result_path: Path | None = None
+        self.report_figures: dict[str, Any] = {}
+        self.report_table_details: dict[str, str] = {}
         self._configure_style()
         self._build()
 
@@ -95,9 +143,10 @@ class ExpertWorkflowApp:
 
         body = ttk.Frame(shell, style="App.TFrame")
         body.pack(fill=BOTH, expand=True)
-        sidebar = ttk.Frame(body, style="Sidebar.TFrame", padding=(18, 16), width=330)
-        sidebar.pack(side=LEFT, fill=Y)
-        sidebar.pack_propagate(False)
+        sidebar_scroll = ScrollFrame(body, width=330)
+        sidebar_scroll.pack(side=LEFT, fill=Y)
+        self.control_scroll = sidebar_scroll
+        sidebar = sidebar_scroll.inner
 
         self._side_label(sidebar, "Dataset")
         ttk.Entry(sidebar, textvariable=self.dataset_path).pack(fill=X, pady=(4, 5))
@@ -165,19 +214,72 @@ class ExpertWorkflowApp:
 
         notebook = ttk.Notebook(main)
         notebook.pack(fill=BOTH, expand=True, pady=(14, 0))
+        self.notebook = notebook
         steps_tab = ttk.Frame(notebook, padding=8)
         reliability_tab = ttk.Frame(notebook, padding=8)
         summary_tab = ttk.Frame(notebook, padding=8)
+        report_tab = ttk.Frame(notebook, padding=8)
         json_tab = ttk.Frame(notebook, padding=8)
         notebook.add(steps_tab, text="Diagnostic Gates")
         notebook.add(reliability_tab, text="Reliability Evidence")
         notebook.add(summary_tab, text="Major Results")
+        notebook.add(report_tab, text="Complete Report")
         notebook.add(json_tab, text="Raw Evidence JSON")
+        self.report_tab = report_tab
 
         self.steps_tree = self._tree(steps_tab, ("name", "status", "required", "message", "error"))
         self.reliability_tree = self._tree(reliability_tab, ("diagnostic", "status", "value", "criterion", "impact", "why"))
         self.summary_tree = self._tree(summary_tab, ("section", "metric", "value"))
         self.json_text = self._text(json_tab)
+
+        report_actions = ttk.Frame(report_tab)
+        report_actions.pack(fill=X, pady=(0, 7))
+        ttk.Label(
+            report_actions,
+            text="Completed-run report: scientific verdicts, charts, evidence tables and saved files",
+            font=("Segoe UI", 10, "bold"),
+        ).pack(side=LEFT)
+        ttk.Button(report_actions, text="Open interactive dashboard", command=self.open_dashboard).pack(side=RIGHT, padx=(6, 0))
+        ttk.Button(report_actions, text="Open report folder", command=self.open_output_folder).pack(side=RIGHT)
+
+        self.report_notebook = ttk.Notebook(report_tab)
+        self.report_notebook.pack(fill=BOTH, expand=True)
+        report_overview_tab = ttk.Frame(self.report_notebook, padding=8)
+        report_charts_tab = ttk.Frame(self.report_notebook, padding=8)
+        report_tables_tab = ttk.Frame(self.report_notebook, padding=8)
+        report_files_tab = ttk.Frame(self.report_notebook, padding=8)
+        self.report_notebook.add(report_overview_tab, text="Overview")
+        self.report_notebook.add(report_charts_tab, text="Charts")
+        self.report_notebook.add(report_tables_tab, text="Evidence Tables")
+        self.report_notebook.add(report_files_tab, text="Files")
+
+        self.report_overview_text = self._text(report_overview_tab)
+        self.report_overview_text.configure(wrap="word")
+
+        chart_bar = ttk.Frame(report_charts_tab)
+        chart_bar.pack(fill=X, pady=(0, 7))
+        ttk.Label(chart_bar, text="Report chart").pack(side=LEFT)
+        self.report_chart_picker = ttk.Combobox(chart_bar, textvariable=self.report_chart_name, state="readonly", width=44)
+        self.report_chart_picker.pack(side=LEFT, padx=(8, 0))
+        self.report_chart_picker.bind("<<ComboboxSelected>>", lambda _event: self._show_report_chart())
+        ttk.Button(chart_bar, text="Open all charts interactively", command=self.open_dashboard).pack(side=RIGHT)
+        self.report_chart_preview = NativeChartPreview(report_charts_tab)
+        self.report_chart_preview.pack(fill=BOTH, expand=True)
+        self.report_chart_preview.show_message("Run the complete workflow to build the report charts.")
+
+        report_table_split = ttk.Panedwindow(report_tables_tab, orient="vertical")
+        report_table_split.pack(fill=BOTH, expand=True)
+        report_table_frame = ttk.Frame(report_table_split)
+        report_detail_frame = ttk.Frame(report_table_split)
+        report_table_split.add(report_table_frame, weight=4)
+        report_table_split.add(report_detail_frame, weight=1)
+        self.report_table = self._tree(report_table_frame, ("category", "item", "status", "value"))
+        self.report_table.bind("<<TreeviewSelect>>", self._show_report_table_detail)
+        self.report_detail_text = self._text(report_detail_frame)
+        self.report_detail_text.configure(wrap="word", height=5)
+
+        self.report_files_text = self._text(report_files_tab)
+        self.report_files_text.configure(wrap="word")
 
         ttk.Label(shell, textvariable=self.status, style="Status.TLabel").pack(fill=X)
 
@@ -229,9 +331,10 @@ class ExpertWorkflowApp:
             messagebox.showinfo(APP_TITLE, "Automatic mode ignores step skips. Choose exploration mode to record and use them.")
         self.status.set("Starting complete expert workflow...")
         self._clear()
+        events: Queue[tuple[str, Any]] = Queue()
 
         def progress(message: str) -> None:
-            self.root.after(0, lambda: self.status.set(f"Running: {message}"))
+            events.put(("progress", message))
 
         def worker() -> None:
             try:
@@ -268,16 +371,45 @@ class ExpertWorkflowApp:
                 result_path = REPORT_ROOT / "expert_workflow_latest.json"
                 result_path.write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
                 dashboard = self._build_dashboard(result, REPORT_ROOT / "expert_workflow_dashboard.html")
-                self.result = result
-                self.dashboard_path = dashboard
-                self.root.after(0, lambda: self._show_result(result))
-                self.root.after(0, lambda: self.status.set(f"Workflow complete. Evidence: {result_path}"))
+                events.put(("done", (result, dashboard, result_path)))
             except Exception as exc:
                 detail = traceback.format_exc()
-                self.root.after(0, lambda: self.status.set("Workflow failed."))
-                self.root.after(0, lambda: messagebox.showerror(APP_TITLE, f"{exc}\n\n{detail[-2200:]}"))
+                events.put(("error", (exc, detail)))
+
+        def poll() -> None:
+            terminal = False
+            while True:
+                try:
+                    state, value = events.get_nowait()
+                except Empty:
+                    break
+                if state == "progress":
+                    self.status.set(f"Running: {value}")
+                elif state == "done":
+                    result, dashboard, result_path = value
+                    self.result = result
+                    self.dashboard_path = dashboard
+                    self.result_path = result_path
+                    self._show_result(result)
+                    self.status.set(f"Workflow complete. Evidence: {result_path}")
+                    terminal = True
+                else:
+                    exc, detail = value
+                    self.status.set("Workflow failed.")
+                    shell = getattr(self.root, "omega_shell", None)
+                    if shell is not None:
+                        shell.log_error("Automatic Expert Workflow", exc, detail)
+                    messagebox.showerror(APP_TITLE, f"{exc}\n\n{detail[-2200:]}")
+                    terminal = True
+            if not terminal:
+                try:
+                    if self.root.winfo_exists():
+                        self.root.after(40, poll)
+                except Exception:
+                    pass
 
         threading.Thread(target=worker, daemon=True).start()
+        self.root.after(40, poll)
 
     def _chart_profile_value(self) -> ChartProfile:
         return PROFILE_STORE.load_all().get(self.chart_profile.get(), ChartProfile())
@@ -405,6 +537,7 @@ class ExpertWorkflowApp:
                 label_key="procedure",
                 title="Management procedure trade-offs",
             )
+        self.report_figures = figures
         return factory.write_dashboard(
             figures,
             output,
@@ -447,14 +580,122 @@ class ExpertWorkflowApp:
                         self.summary_tree.insert("", END, values=(section, key, value))
         self.json_text.delete("1.0", END)
         self.json_text.insert("1.0", json.dumps(result, indent=2, default=str))
+        self._populate_complete_report(result)
+
+    def _populate_complete_report(self, result: Mapping[str, Any]) -> None:
+        summary = result.get("summary") or {}
+        results = result.get("results") or {}
+        self.report_overview_text.delete("1.0", END)
+        lines = [
+            "OMEGA AUTOMATIC EXPERT WORKFLOW â€” COMPLETED RUN\n",
+            f"Dataset: {self.dataset_path.get()}",
+            f"Overall status: {summary.get('status', 'not reported')}",
+            f"Reliability grade: {summary.get('reliability_grade', 'not reported')}",
+            f"Checks completed: {summary.get('steps_completed', 0)} of {summary.get('steps', 0)}",
+            f"Required failures: {summary.get('required_failures', 0)}",
+            f"Warnings: {summary.get('warnings', 0)}",
+            f"Skipped checks: {summary.get('skipped', 0)}",
+            f"Terminal depletion: {summary.get('terminal_depletion', 'not reported')}",
+            "",
+            "How to use this report:",
+            "â€¢ Start with Required failures and Reliability grade.",
+            "â€¢ Inspect every warning or failure in Evidence Tables; select a row for the full explanation and next evidence.",
+            "â€¢ Use Charts to inspect fit, residual patterns, profiles, retrospective bias, interval coverage and MSE trade-offs.",
+            "â€¢ Open the interactive dashboard to zoom, compare series and export figures.",
+            "",
+            "Scientific limitation:",
+            "A completed workflow is an evidence record, not proof that the stock assessment is scientifically correct. "
+            "Review input provenance, model assumptions, diagnostics and management context before using results for decisions.",
+        ]
+        self.report_overview_text.insert("1.0", "\n".join(lines))
+
+        self.report_table.delete(*self.report_table.get_children())
+        self.report_table_details.clear()
+
+        def insert(category: str, item: str, status: Any, value: Any, detail: str) -> None:
+            row = self.report_table.insert("", END, values=(category, item, status, value))
+            self.report_table_details[row] = detail
+
+        for key, value in summary.items():
+            if isinstance(value, (str, int, float, bool)) or value is None:
+                insert("Run summary", str(key).replace("_", " ").title(), "", value, f"Recorded workflow summary value: {value}")
+        for step in result.get("steps") or []:
+            detail = "\n".join(
+                part for part in (
+                    str(step.get("message") or ""),
+                    f"Required: {step.get('required')}",
+                    f"Error: {step.get('error')}" if step.get("error") else "",
+                ) if part
+            )
+            insert("Diagnostic gate", str(step.get("name") or "Unnamed check"), step.get("status"), step.get("required"), detail)
+        reliability = (results.get("reliability") or {})
+        for item in reliability.get("items") or []:
+            detail = "\n".join(
+                part for part in (
+                    f"Criterion: {item.get('criterion')}" if item.get("criterion") is not None else "",
+                    f"Impact: {item.get('impact')}" if item.get("impact") is not None else "",
+                    str(item.get("why") or ""),
+                ) if part
+            )
+            insert("Reliability evidence", str(item.get("name") or "Evidence"), item.get("status"), item.get("value"), detail)
+        for section, payload in results.items():
+            if isinstance(payload, Mapping) and isinstance(payload.get("summary"), Mapping):
+                for key, value in payload["summary"].items():
+                    if isinstance(value, (str, int, float, bool)) or value is None:
+                        insert(str(section).replace("_", " ").title(), str(key).replace("_", " ").title(), "", value, f"{section}.{key} = {value}")
+
+        chart_names = tuple(self.report_figures)
+        self.report_chart_picker.configure(values=chart_names)
+        if chart_names:
+            self.report_chart_name.set(chart_names[0])
+            self._show_report_chart()
+        else:
+            self.report_chart_name.set("")
+            self.report_chart_preview.show_message("The run completed without chart-ready result series. Review Evidence Tables and Raw Evidence JSON.")
+
+        self.report_files_text.delete("1.0", END)
+        file_lines = [
+            f"Source dataset\n{self.dataset_path.get()}",
+            f"\nWorkflow evidence JSON\n{self.result_path or (REPORT_ROOT / 'expert_workflow_latest.json')}",
+            f"\nInteractive chart dashboard\n{self.dashboard_path or (REPORT_ROOT / 'expert_workflow_dashboard.html')}",
+            f"\nReport folder\n{REPORT_ROOT}",
+            f"\nCharts generated\n{len(chart_names)}",
+            "\nThe JSON preserves the complete numerical evidence. The dashboard contains the chart-ready portions of that evidence.",
+        ]
+        self.report_files_text.insert("1.0", "\n".join(file_lines))
+        self.notebook.select(self.report_tab)
+
+    def _show_report_chart(self) -> None:
+        name = self.report_chart_name.get()
+        figure = self.report_figures.get(name)
+        if figure is None:
+            self.report_chart_preview.show_message("Choose a completed-run chart from the list.")
+            return
+        layout = getattr(figure, "layout", None)
+        title = str(getattr(getattr(layout, "title", None), "text", None) or name)
+        x_title = str(getattr(getattr(getattr(layout, "xaxis", None), "title", None), "text", None) or "")
+        y_title = str(getattr(getattr(getattr(layout, "yaxis", None), "title", None), "text", None) or "")
+        self.report_chart_preview.show_figure(figure, title, x_title, y_title)
+
+    def _show_report_table_detail(self, _event=None) -> None:
+        selected = self.report_table.selection()
+        detail = self.report_table_details.get(selected[0], "Select an evidence row to see its full explanation.") if selected else "Select an evidence row to see its full explanation."
+        self.report_detail_text.delete("1.0", END)
+        self.report_detail_text.insert("1.0", detail)
 
     def _clear(self) -> None:
         for card in (self.overall_card, self.grade_card, self.steps_card, self.failure_card, self.depletion_card):
             card.value.set("—")
             card.subtitle.set("")
-        for tree in (self.steps_tree, self.reliability_tree, self.summary_tree):
+        for tree in (self.steps_tree, self.reliability_tree, self.summary_tree, self.report_table):
             tree.delete(*tree.get_children())
         self.json_text.delete("1.0", END)
+        self.report_overview_text.delete("1.0", END)
+        self.report_files_text.delete("1.0", END)
+        self.report_detail_text.delete("1.0", END)
+        self.report_chart_name.set("")
+        self.report_chart_picker.configure(values=())
+        self.report_chart_preview.show_message("Run the complete workflow to build the report charts.")
 
     def open_dashboard(self) -> None:
         if self.dashboard_path and self.dashboard_path.exists():

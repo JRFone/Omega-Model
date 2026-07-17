@@ -1,0 +1,49 @@
+{
+  "generated_utc": "2026-07-17T14:08:08.988015+00:00",
+  "dataset": "WA Dhufish public-evidence reconstruction",
+  "sources": [
+    {
+      "file": "DPIRD_West_Coast_Demersal_2025_RAR2.pdf",
+      "title": "West Coast Demersal Scalefish Resource status assessment 2025",
+      "url": "https://library.dpird.wa.gov.au/fish_rar/2/",
+      "role": "Current assessment, public input summaries and model outputs",
+      "local_path": "Public_Sources\\DPIRD_West_Coast_Demersal_2025_RAR2.pdf",
+      "bytes": 6014457,
+      "sha256": "a0ea3ca7f44d310ee89a4477eac04443247ef10acf55b1273c8aa169ffbce273",
+      "pdf_pages": 135
+    },
+    {
+      "file": "DPIRD_FOP151_2025_External_Review_Response.pdf",
+      "title": "External review and departmental response (FOP 151)",
+      "url": "https://library.dpird.wa.gov.au/fr_fop/101/",
+      "role": "Bespoke/SS bridge configuration, review findings and sensitivities",
+      "local_path": "Public_Sources\\DPIRD_FOP151_2025_External_Review_Response.pdf",
+      "bytes": 33721713,
+      "sha256": "1cf992de9bb5a65c0c978ca8d46c14ff9a75c826ee62d67352e45e33016173ce",
+      "pdf_pages": 214
+    },
+    {
+      "file": "DPIRD_West_Coast_Demersal_2021_FRR316.pdf",
+      "title": "West Coast Demersal Scalefish Resource assessment 2021 (FRR 316)",
+      "url": "https://library.dpird.wa.gov.au/fr_rr/133/",
+      "role": "Earlier assessment and technical configuration",
+      "local_path": "Public_Sources\\DPIRD_West_Coast_Demersal_2021_FRR316.pdf",
+      "bytes": 21840450,
+      "sha256": "67f83b6dab2c111907d18577bef33bc8655e53632005bd890a55e10bbc7b8553",
+      "pdf_pages": 168
+    },
+    {
+      "file": "DPIRD_WCDSR_Synopsis_2024_FRR346.pdf",
+      "title": "West Coast Demersal Scalefish Resource synopsis 2024 (FRR 346)",
+      "url": "https://library.dpird.wa.gov.au/fr_rr/264/",
+      "role": "Published life-history parameter table",
+      "local_path": "Public_Sources\\DPIRD_WCDSR_Synopsis_2024_FRR346.pdf",
+      "bytes": 2423392,
+      "sha256": "3174c9116007e412702244c1307085bf676574bf85f3d12f4a6053e7d1833049",
+      "pdf_pages": 90
+    }
+  ],
+  "raw_dpird_model_files_available": false,
+  "raw_dpird_annual_input_tables_available": false,
+  "warning": "Chart-digitised values are approximations and are never represented as raw DPIRD data."
+}

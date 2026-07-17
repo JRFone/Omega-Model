@@ -48,6 +48,7 @@ CHART_TYPES = (
     "Residual heatmap",
     "Jitter distribution",
     "Optimizer agreement",
+    "Optimization surface / grid",
     "Likelihood-component conflict",
     "Likelihood profile",
     "Retrospective analysis",
@@ -62,6 +63,7 @@ class ScrollFrame(ttk.Frame):
     def __init__(self, parent, *, width: int = 340) -> None:
         super().__init__(parent)
         canvas = Canvas(self, width=width, highlightthickness=0, background="#102a43")
+        canvas.omega_role = "workspace_controls"  # type: ignore[attr-defined]
         scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
         self.inner = ttk.Frame(canvas, style="Sidebar.TFrame", padding=(16, 14))
         window = canvas.create_window((0, 0), window=self.inner, anchor="nw")
@@ -71,6 +73,255 @@ class ScrollFrame(ttk.Frame):
         canvas.pack(side=LEFT, fill=BOTH, expand=True)
         scrollbar.pack(side=RIGHT, fill=Y)
         self.canvas = canvas
+        self.bind_all("<MouseWheel>", self._wheel, add="+")
+        self.bind_all("<Button-4>", self._wheel, add="+")
+        self.bind_all("<Button-5>", self._wheel, add="+")
+
+    def _wheel(self, event):
+        try:
+            current = getattr(event, "widget", None)
+            inside = False
+            while current is not None:
+                if current in {self, self.canvas, self.inner}:
+                    inside = True
+                    break
+                current = getattr(current, "master", None)
+            pointer_x, pointer_y = self.winfo_pointerx(), self.winfo_pointery()
+            inside = inside or (
+                self.canvas.winfo_rootx() <= pointer_x < self.canvas.winfo_rootx() + self.canvas.winfo_width()
+                and self.canvas.winfo_rooty() <= pointer_y < self.canvas.winfo_rooty() + self.canvas.winfo_height()
+            )
+            if not inside:
+                return None
+            direction = -1 if getattr(event, "delta", 0) > 0 or getattr(event, "num", 0) == 4 else 1
+            self.canvas.yview_scroll(direction * 3, "units")
+            return "break"
+        except Exception:
+            return None
+
+
+class NativeChartPreview(ttk.Frame):
+    """Lightweight in-window preview of the Plotly figure built by Chart Studio."""
+
+    PALETTE = ("#42bff5", "#ffb85c", "#5ed59a", "#ba9cff", "#f27d90", "#92a9bd")
+
+    def __init__(self, parent) -> None:
+        super().__init__(parent)
+        self.canvas = Canvas(self, highlightthickness=1, highlightbackground="#41566f", background="#081522")
+        self.canvas.pack(fill=BOTH, expand=True)
+        self.figure = None
+        self.title = ""
+        self.x_title = ""
+        self.y_title = ""
+        self.canvas.bind("<Configure>", lambda _event: self.redraw())
+
+    def show_figure(self, figure, title: str, x_title: str, y_title: str) -> None:
+        self.figure = figure
+        self.title = title
+        self.x_title = x_title
+        self.y_title = y_title
+        self.redraw()
+
+    def show_message(self, message: str) -> None:
+        self.figure = None
+        self.canvas.delete("all")
+        self.canvas.create_text(
+            max(20, self.canvas.winfo_width() // 2),
+            max(20, self.canvas.winfo_height() // 2),
+            text=message,
+            width=max(260, self.canvas.winfo_width() - 80),
+            justify="center",
+            fill="#dce8f2",
+            font=("Segoe UI", 11),
+        )
+
+    def redraw(self) -> None:
+        if self.figure is None:
+            return
+        traces = [trace for trace in self.figure.data if getattr(trace, "visible", True) is not False]
+        if not traces:
+            self.show_message("This chart has no drawable values. Check the selected columns.")
+            return
+        heatmap = next((trace for trace in traces if getattr(trace, "type", "") == "heatmap"), None)
+        if heatmap is not None:
+            self._draw_heatmap(heatmap, traces)
+            return
+        bar = next((trace for trace in traces if getattr(trace, "type", "") == "bar"), None)
+        if bar is not None:
+            self._draw_bar(bar)
+            return
+        self._draw_series(traces)
+
+    def _base(self) -> tuple[int, int, int, int, int, int]:
+        canvas = self.canvas
+        width = max(520, canvas.winfo_width())
+        height = max(320, canvas.winfo_height())
+        canvas.delete("all")
+        left, right, top, bottom = 74, 26, 50, 58
+        canvas.create_text(left, 15, anchor="nw", text=self.title, fill="#dce8f2", font=("Segoe UI", 12, "bold"))
+        return width, height, left, right, top, bottom
+
+    def _draw_series(self, traces) -> None:
+        width, height, left, right, top, bottom = self._base()
+        usable = []
+        categorical: dict[str, float] = {}
+        for trace in traces[:10]:
+            y_value = getattr(trace, "y", None)
+            y_raw = list(y_value) if y_value is not None else []
+            x_value = getattr(trace, "x", None)
+            x_raw = list(x_value) if x_value is not None else list(range(len(y_raw)))
+            points = []
+            for index, (x_value, y_value) in enumerate(zip(x_raw, y_raw)):
+                try:
+                    y_number = float(y_value)
+                except (TypeError, ValueError):
+                    continue
+                if not np.isfinite(y_number):
+                    continue
+                try:
+                    x_number = float(x_value)
+                except (TypeError, ValueError):
+                    key = str(x_value)
+                    x_number = categorical.setdefault(key, float(len(categorical)))
+                if np.isfinite(x_number):
+                    points.append((x_number, y_number, index))
+            if points:
+                usable.append((trace, points))
+        if not usable:
+            self.show_message("The selected values are not numeric enough to draw this chart.")
+            return
+        all_x = [point[0] for _trace, points in usable for point in points]
+        all_y = [point[1] for _trace, points in usable for point in points]
+        x_min, x_max = min(all_x), max(all_x)
+        y_min, y_max = min(all_y), max(all_y)
+        if x_max <= x_min:
+            x_max = x_min + 1.0
+        if y_max <= y_min:
+            padding = max(abs(y_min) * 0.1, 1.0)
+            y_min -= padding
+            y_max += padding
+        else:
+            padding = (y_max - y_min) * 0.08
+            y_min -= padding
+            y_max += padding
+        plot_w, plot_h = width - left - right, height - top - bottom
+
+        def xy(x_value: float, y_value: float) -> tuple[float, float]:
+            return (
+                left + (x_value - x_min) / (x_max - x_min) * plot_w,
+                top + (y_max - y_value) / (y_max - y_min) * plot_h,
+            )
+
+        self._axes(width, height, left, right, top, bottom, x_min, x_max, y_min, y_max)
+        legend_x = left + 8
+        for series_index, (trace, points) in enumerate(usable):
+            color = self.PALETTE[series_index % len(self.PALETTE)]
+            mode = str(getattr(trace, "mode", "lines") or "lines")
+            coords = [coordinate for x_value, y_value, _index in points for coordinate in xy(x_value, y_value)]
+            if "lines" in mode and len(coords) >= 4:
+                self.canvas.create_line(*coords, fill=color, width=2)
+            if "markers" in mode or getattr(trace, "type", "") == "violin" or "lines" not in mode:
+                for x_value, y_value, _index in points[:1500]:
+                    x_pos, y_pos = xy(x_value, y_value)
+                    self.canvas.create_oval(x_pos - 2.5, y_pos - 2.5, x_pos + 2.5, y_pos + 2.5, fill=color, outline=color)
+            name = str(getattr(trace, "name", "") or f"Series {series_index + 1}")
+            if name and not name.endswith((" upper", " uncertainty")):
+                self.canvas.create_line(legend_x, top + 8, legend_x + 18, top + 8, fill=color, width=3)
+                self.canvas.create_text(legend_x + 23, top + 8, anchor="w", text=name[:28], fill="#dce8f2", font=("Segoe UI", 8))
+                legend_x += min(190, 48 + len(name[:28]) * 6)
+
+    def _axes(self, width, height, left, right, top, bottom, x_min, x_max, y_min, y_max) -> None:
+        plot_w, plot_h = width - left - right, height - top - bottom
+        for tick in range(6):
+            fraction = tick / 5.0
+            y_pos = top + plot_h - fraction * plot_h
+            y_value = y_min + fraction * (y_max - y_min)
+            self.canvas.create_line(left, y_pos, width - right, y_pos, fill="#294158")
+            self.canvas.create_text(left - 9, y_pos, anchor="e", text=f"{y_value:.4g}", fill="#dce8f2", font=("Segoe UI", 8))
+            x_pos = left + fraction * plot_w
+            x_value = x_min + fraction * (x_max - x_min)
+            self.canvas.create_text(x_pos, height - bottom + 12, anchor="n", text=f"{x_value:.6g}", fill="#dce8f2", font=("Segoe UI", 8))
+        self.canvas.create_text(14, top + plot_h / 2, text=self.y_title, angle=90, fill="#dce8f2", font=("Segoe UI", 9))
+        self.canvas.create_text(left + plot_w / 2, height - 9, text=self.x_title, fill="#dce8f2", font=("Segoe UI", 9))
+
+    def _draw_heatmap(self, trace, traces=()) -> None:
+        width, height, left, right, top, bottom = self._base()
+        try:
+            values = np.asarray(trace.z, dtype=float)
+        except Exception:
+            self.show_message("The heatmap matrix could not be read.")
+            return
+        if values.ndim != 2 or values.size == 0:
+            self.show_message("The heatmap needs a two-dimensional numeric matrix.")
+            return
+        rows, columns = values.shape
+        plot_w, plot_h = width - left - right, height - top - bottom
+        finite = values[np.isfinite(values)]
+        limit = max(float(np.max(np.abs(finite))) if finite.size else 1.0, 1e-9)
+        for row in range(rows):
+            for column in range(columns):
+                value = values[row, column]
+                if not np.isfinite(value):
+                    color = "#294158"
+                else:
+                    strength = min(abs(float(value)) / limit, 1.0)
+                    if value >= 0:
+                        color = f"#{int(55 + 170 * strength):02x}{int(93 + 50 * (1-strength)):02x}{int(115 + 40 * (1-strength)):02x}"
+                    else:
+                        color = f"#{int(55 + 30 * (1-strength)):02x}{int(105 + 80 * strength):02x}{int(130 + 105 * strength):02x}"
+                x0 = left + column / columns * plot_w
+                x1 = left + (column + 1) / columns * plot_w
+                y0 = top + row / rows * plot_h
+                y1 = top + (row + 1) / rows * plot_h
+                self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="#081522")
+        x_raw = getattr(trace, "x", None)
+        y_raw = getattr(trace, "y", None)
+        x_labels = list(x_raw) if x_raw is not None else []
+        y_labels = list(y_raw) if y_raw is not None else []
+        if columns <= 12:
+            for column, label in enumerate(x_labels[:columns]):
+                x_pos = left + (column + 0.5) / columns * plot_w
+                self.canvas.create_text(x_pos, height - bottom + 10, anchor="n", text=f"{label:.4g}" if isinstance(label, (int, float)) else str(label)[:10], fill="#dce8f2", font=("Segoe UI", 7))
+        if rows <= 12:
+            for row, label in enumerate(y_labels[:rows]):
+                y_pos = top + (row + 0.5) / rows * plot_h
+                self.canvas.create_text(left - 7, y_pos, anchor="e", text=f"{label:.4g}" if isinstance(label, (int, float)) else str(label)[:10], fill="#dce8f2", font=("Segoe UI", 7))
+        best_trace = next((item for item in traces if str(getattr(item, "name", "")).lower().startswith("best")), None)
+        if best_trace is not None and x_labels and y_labels:
+            try:
+                best_x = float(list(best_trace.x)[0])
+                best_y = float(list(best_trace.y)[0])
+                x_index = min(range(len(x_labels)), key=lambda index: abs(float(x_labels[index]) - best_x))
+                y_index = min(range(len(y_labels)), key=lambda index: abs(float(y_labels[index]) - best_y))
+                x_pos = left + (x_index + 0.5) / columns * plot_w
+                y_pos = top + (y_index + 0.5) / rows * plot_h
+                self.canvas.create_text(x_pos, y_pos, text="★", fill="#ffffff", font=("Segoe UI Symbol", 18, "bold"))
+            except (AttributeError, TypeError, ValueError):
+                pass
+        self.canvas.create_text(left + plot_w / 2, height - 9, text=self.x_title, fill="#dce8f2", font=("Segoe UI", 9))
+        self.canvas.create_text(14, top + plot_h / 2, text=self.y_title, angle=90, fill="#dce8f2", font=("Segoe UI", 9))
+
+    def _draw_bar(self, trace) -> None:
+        width, height, left, right, top, bottom = self._base()
+        try:
+            values = np.asarray(list(trace.x if getattr(trace, "orientation", "") == "h" else trace.y), dtype=float)
+        except Exception:
+            self.show_message("The bar values could not be read.")
+            return
+        labels = list(trace.y if getattr(trace, "orientation", "") == "h" else trace.x)
+        if values.size == 0:
+            self.show_message("The selected values produced no bars.")
+            return
+        plot_w, plot_h = width - left - right, height - top - bottom
+        maximum = max(float(np.nanmax(values)), 1e-9)
+        bar_h = plot_h / max(len(values), 1)
+        for index, (label, value) in enumerate(zip(labels, values)):
+            y0 = top + index * bar_h + 2
+            y1 = top + (index + 1) * bar_h - 2
+            x1 = left + max(0.0, float(value)) / maximum * plot_w
+            self.canvas.create_rectangle(left, y0, x1, y1, fill=self.PALETTE[index % len(self.PALETTE)], outline="")
+            if len(values) <= 18:
+                self.canvas.create_text(left + 5, (y0 + y1) / 2, anchor="w", text=str(label)[:24], fill="#ffffff", font=("Segoe UI", 8))
 
 
 class ChartStudioApp:
@@ -82,7 +333,9 @@ class ChartStudioApp:
         self.frame: pd.DataFrame | None = None
         self.source_path: Path | None = None
         self.last_output: Path | None = None
+        self._preview_after: str | None = None
         self.status = StringVar(value="Load an Omega result CSV/JSON or use a built-in demonstration.")
+        self.chart_requirement = StringVar(value="The live chart updates when you change columns or chart type.")
 
         self.chart_type = StringVar(value=CHART_TYPES[0])
         self.x_column = StringVar(value="")
@@ -94,6 +347,7 @@ class ChartStudioApp:
         self.y_title = StringVar(value="Value")
         self.normalize = BooleanVar(value=False)
         self.log_y = BooleanVar(value=False)
+        self.optimization_goal = StringVar(value="minimize")
 
         self.profile_name = StringVar(value="Omega default")
         self.template = StringVar(value="plotly_white")
@@ -118,6 +372,7 @@ class ChartStudioApp:
 
         self._configure_style()
         self._build()
+        self._bind_live_preview_controls()
         self._refresh_profiles()
         self.load_demo()
 
@@ -169,27 +424,44 @@ class ChartStudioApp:
         ttk.Separator(controls).pack(fill=X, pady=12)
 
         self._side_label(controls, "Chart type")
-        ttk.Combobox(controls, textvariable=self.chart_type, values=CHART_TYPES, state="readonly").pack(fill=X, pady=(4, 7))
+        self.chart_type_combo = ttk.Combobox(controls, textvariable=self.chart_type, values=CHART_TYPES, state="readonly")
+        self.chart_type_combo.pack(fill=X, pady=(4, 7))
+        self.chart_type_combo.bind("<<ComboboxSelected>>", self._chart_type_changed)
 
         self._side_label(controls, "X column")
         self.x_combo = ttk.Combobox(controls, textvariable=self.x_column, state="readonly")
         self.x_combo.pack(fill=X, pady=(4, 7))
+        self.x_combo.bind("<<ComboboxSelected>>", lambda _event: self._schedule_live_preview())
 
         self._side_label(controls, "Y columns — multi-select")
         self.y_list = Listbox(controls, selectmode="extended", exportselection=False, height=7)
         self.y_list.pack(fill=X, pady=(4, 7))
+        self.y_list.bind("<<ListboxSelect>>", lambda _event: self._schedule_live_preview())
 
         self._side_label(controls, "Group / label column")
         self.group_combo = ttk.Combobox(controls, textvariable=self.group_column, state="readonly")
         self.group_combo.pack(fill=X, pady=(4, 7))
+        self.group_combo.bind("<<ComboboxSelected>>", lambda _event: self._schedule_live_preview())
 
         self._side_label(controls, "Lower uncertainty / colour column")
         self.lower_combo = ttk.Combobox(controls, textvariable=self.lower_column, state="readonly")
         self.lower_combo.pack(fill=X, pady=(4, 7))
+        self.lower_combo.bind("<<ComboboxSelected>>", lambda _event: self._schedule_live_preview())
 
         self._side_label(controls, "Upper uncertainty / size column")
         self.upper_combo = ttk.Combobox(controls, textvariable=self.upper_column, state="readonly")
         self.upper_combo.pack(fill=X, pady=(4, 7))
+        self.upper_combo.bind("<<ComboboxSelected>>", lambda _event: self._schedule_live_preview())
+
+        self._side_label(controls, "Optimization goal")
+        self.optimization_goal_combo = ttk.Combobox(
+            controls,
+            textvariable=self.optimization_goal,
+            values=("minimize", "maximize"),
+            state="readonly",
+        )
+        self.optimization_goal_combo.pack(fill=X, pady=(4, 7))
+        self.optimization_goal_combo.bind("<<ComboboxSelected>>", lambda _event: self._schedule_live_preview())
 
         ttk.Separator(controls).pack(fill=X, pady=12)
         self._side_label(controls, "Titles and transforms")
@@ -252,6 +524,7 @@ class ChartStudioApp:
             ttk.Checkbutton(controls, text=text, variable=variable).pack(anchor="w", pady=2)
 
         ttk.Separator(controls).pack(fill=X, pady=12)
+        ttk.Button(controls, text="UPDATE LIVE CHART", command=self.update_live_preview).pack(fill=X, pady=2)
         ttk.Button(controls, text="OPEN INTERACTIVE PREVIEW", style="Primary.TButton", command=self.preview).pack(fill=X, pady=3)
         ttk.Button(controls, text="Save chart HTML", command=self.save_chart).pack(fill=X, pady=2)
         ttk.Button(controls, text="Build automatic results dashboard", command=self.build_auto_dashboard).pack(fill=X, pady=2)
@@ -261,14 +534,22 @@ class ChartStudioApp:
         main = ttk.Frame(body, style="App.TFrame", padding=(16, 14))
         main.pack(side=RIGHT, fill=BOTH, expand=True)
         notebook = ttk.Notebook(main)
+        self.notebook = notebook
         notebook.pack(fill=BOTH, expand=True)
 
+        chart_tab = ttk.Frame(notebook, padding=8)
         data_tab = ttk.Frame(notebook, padding=10)
         guide_tab = ttk.Frame(notebook, padding=14)
         profile_tab = ttk.Frame(notebook, padding=14)
+        notebook.add(chart_tab, text="Live Chart")
         notebook.add(data_tab, text="Data Preview")
         notebook.add(guide_tab, text="Chart Controls")
         notebook.add(profile_tab, text="Personalisation")
+
+        ttk.Label(chart_tab, textvariable=self.chart_requirement, wraplength=1000, justify="left").pack(anchor="w", fill=X, pady=(0, 7))
+        self.live_preview = NativeChartPreview(chart_tab)
+        self.live_preview.pack(fill=BOTH, expand=True)
+        self.live_preview.show_message("Loading chart data...")
 
         self.tree = ttk.Treeview(data_tab, show="headings")
         yscroll = ttk.Scrollbar(data_tab, orient="vertical", command=self.tree.yview)
@@ -316,6 +597,112 @@ class ChartStudioApp:
     def _spin(parent, label: str, variable, minimum: float, maximum: float, increment: float) -> None:
         ttk.Label(parent, text=label, style="SideText.TLabel").pack(anchor="w")
         ttk.Spinbox(parent, textvariable=variable, from_=minimum, to=maximum, increment=increment).pack(fill=X, pady=(3, 6))
+
+    def _bind_live_preview_controls(self) -> None:
+        for variable in (
+            self.title,
+            self.x_title,
+            self.y_title,
+            self.normalize,
+            self.log_y,
+            self.template,
+            self.line_width,
+            self.marker_size,
+            self.show_grid,
+            self.show_legend,
+            self.background,
+            self.plot_background,
+            self.palette,
+            self.optimization_goal,
+        ):
+            variable.trace_add("write", lambda *_args: self._schedule_live_preview())
+
+    def _schedule_live_preview(self) -> None:
+        try:
+            if self._preview_after is not None:
+                self.root.after_cancel(self._preview_after)
+            # A short debounce prevents repeated Plotly rebuilds while a user is
+            # moving through controls or typing a title.
+            self._preview_after = self.root.after(300, self.update_live_preview)
+        except Exception:
+            self._preview_after = None
+
+    def update_live_preview(self) -> None:
+        self._preview_after = None
+        if self.frame is None:
+            self.live_preview.show_message("Load data to display a chart.")
+            return
+        try:
+            figure = self._build_figure()
+            self.live_preview.show_figure(figure, self.title.get().strip() or self.chart_type.get(), self.x_title.get(), self.y_title.get())
+            self.status.set(f"Live {self.chart_type.get().lower()} chart updated. Use OPEN INTERACTIVE PREVIEW for zoom, hover, selection and export.")
+        except Exception as exc:
+            self.live_preview.show_message(f"This chart needs another input:\n{exc}")
+            self.status.set(f"Live chart needs attention: {exc}")
+
+    def _chart_type_changed(self, _event=None) -> None:
+        self._configure_chart_type()
+        self._schedule_live_preview()
+
+    def _select_y_columns(self, names: list[str]) -> None:
+        if self.frame is None:
+            return
+        columns = list(self.frame.columns)
+        self.y_list.selection_clear(0, END)
+        for name in names:
+            if name in columns:
+                self.y_list.selection_set(columns.index(name))
+
+    def _configure_chart_type(self) -> None:
+        if self.frame is None:
+            return
+        columns = list(self.frame.columns)
+        numeric = [column for column in columns if pd.api.types.is_numeric_dtype(self.frame[column])]
+
+        def pick(names: tuple[str, ...], fallback: str = "") -> str:
+            lowered = {column.lower(): column for column in columns}
+            for name in names:
+                if name.lower() in lowered:
+                    return lowered[name.lower()]
+            return fallback if fallback in columns else ""
+
+        year = pick(("year", "date", "time", "iteration", "run"), columns[0])
+        lower = pick(("lower", "lwr", "q05", "p05", "lo"))
+        upper = pick(("upper", "upr", "q95", "p95", "hi"))
+        chart = self.chart_type.get()
+        fallback_y = [column for column in numeric if column != year]
+        settings: dict[str, tuple[str, list[str], str, str, str, str]] = {
+            "Time series / overlays": (
+                year,
+                [pick(("Omega median", "biomass", "depletion", "index"), fallback_y[0] if fallback_y else ""), pick(("Alternative structure", "predicted"), fallback_y[1] if len(fallback_y) > 1 else "")],
+                "",
+                lower,
+                upper,
+                "Select one or more numeric Y columns. Optional lower and upper columns add an uncertainty band to the first series.",
+            ),
+            "Residual heatmap": (year, [pick(("residual", "index_log_residual"), fallback_y[0] if fallback_y else "")], pick(("fleet", "source", "age", "model")), "", "", "Use a group column for rows, or select several residual columns to draw one row per series."),
+            "Jitter distribution": (pick(("run", "iteration"), year), [pick(("objective", "nll", "value"), fallback_y[0] if fallback_y else "")], pick(("optimizer", "algorithm", "model")), "", "", "Select an objective/value column and an optimizer or configuration group."),
+            "Optimizer agreement": (pick(("objective", "nll"), year), [pick(("terminal_depletion", "depletion", "value"), fallback_y[0] if fallback_y else "")], pick(("optimizer", "algorithm", "model")), "", "", "Select objective on X, an estimated quantity on Y, and optimizer/configuration as the group."),
+            "Optimization surface / grid": (pick(("parameter_x", "r", "growth_rate"), year), [pick(("parameter_y", "k", "carrying_capacity"), fallback_y[0] if fallback_y else "")], "", pick(("fitness", "objective", "score", "objective_delta")), "", "Select the two parameters on X and Y, then select objective or fitness in the colour column. The best combination is marked with a star."),
+            "Likelihood-component conflict": (pick(("component", "source", "model"), year), [pick(("delta_nll", "objective", "value"), fallback_y[0] if fallback_y else "")], pick(("component", "source", "model")), "", "", "Select a likelihood-component label and its objective change."),
+            "Likelihood profile": (pick(("parameter_value", "fixed_value", "value"), year), [pick(("objective", "delta_nll"), fallback_y[0] if fallback_y else ""), pick(("component_a",), fallback_y[1] if len(fallback_y) > 1 else "")], "", "", "", "Select the fixed parameter value on X and total objective first on Y; extra Y columns show component profiles."),
+            "Retrospective analysis": (year, [pick(("biomass", "depletion", "estimate", "observed"), fallback_y[0] if fallback_y else "")], pick(("peel", "run", "model")), "", "", "Retrospective charts require a Full/Base group plus Peel 1, Peel 2, and later truncated refits. Generate these in Automatic Expert Workflow."),
+            "Hindcast prediction": (year, [pick(("observed", "actual"), fallback_y[0] if fallback_y else ""), pick(("predicted", "prediction"), fallback_y[1] if len(fallback_y) > 1 else "")], "", lower, upper, "Select observed then predicted Y columns. Optional lower/upper columns show predictive uncertainty."),
+            "Structural ensemble fan": (year, [pick(("Omega median", "median", "biomass"), fallback_y[0] if fallback_y else ""), pick(("Alternative structure", "member"), fallback_y[1] if len(fallback_y) > 1 else "")], "", lower, upper, "Select the ensemble median first, optional member series after it, plus lower and upper uncertainty columns."),
+            "Closed-loop MSE trade-off": (pick(("average_catch", "mean_catch", "catch"), year), [pick(("probability_above_limit", "prob_above_limit", "p_above_limit"), fallback_y[0] if fallback_y else "")], pick(("procedure", "strategy", "model")), pick(("catch_cv", "variability"), lower), pick(("closure_probability", "size"), upper), "Select yield on X, conservation performance on Y, procedure as label, and optional colour/size measures."),
+            "Interval coverage": (pick(("nominal", "confidence_level"), year), [pick(("empirical", "coverage"), fallback_y[0] if fallback_y else "")], pick(("parameter", "method", "model")), "", "", "Select nominal coverage on X, empirical coverage on Y, and parameter or method as the group."),
+        }
+        x_col, y_cols, group, low_col, high_col, requirement = settings[chart]
+        clean_y = []
+        for name in y_cols:
+            if name and name not in clean_y and name != x_col:
+                clean_y.append(name)
+        self.x_column.set(x_col)
+        self.group_column.set(group)
+        self.lower_column.set(low_col)
+        self.upper_column.set(high_col)
+        self._select_y_columns(clean_y)
+        self.chart_requirement.set(requirement)
 
     def _refresh_profiles(self) -> None:
         profiles = PROFILE_STORE.load_all()
@@ -432,6 +819,7 @@ class ChartStudioApp:
 
     def load_demo(self) -> None:
         years = np.arange(1980, 2026)
+        row = np.arange(len(years))
         depletion_a = np.clip(0.95 - 0.014 * (years - years[0]) + 0.06 * np.sin((years - 1980) / 4), 0.12, 1.0)
         depletion_b = np.clip(0.93 - 0.012 * (years - years[0]) + 0.04 * np.sin((years - 1981) / 5), 0.14, 1.0)
         uncertainty = 0.04 + 0.0015 * (years - years[0])
@@ -444,6 +832,29 @@ class ChartStudioApp:
                 "upper": np.clip(depletion_a + uncertainty, None, 1.2),
                 "model": ["Omega"] * len(years),
                 "residual": np.sin(years / 3.1) * 0.8,
+                "run": row + 1,
+                "optimizer": np.asarray(("DE", "L-BFGS-B", "CMA-ES"))[row % 3],
+                "objective": 120.0 + 0.04 * np.square(row - 22) + 0.25 * np.sin(row),
+                "terminal_depletion": np.clip(0.30 + 0.025 * np.sin(row / 2.5), 0.0, 1.0),
+                "parameter_x": 0.08 + (row % 8) * 0.035,
+                "parameter_y": 2200.0 + (row // 8) * 700.0,
+                "fitness": 80.0 + np.square((row % 8) - 3.0) * 2.5 + np.square((row // 8) - 2.0) * 4.0,
+                "component": np.asarray(("index", "biomass", "composition", "prior"))[row % 4],
+                "delta_nll": np.abs(np.sin(row / 6.0)) * 3.0,
+                "parameter_value": np.linspace(0.10, 0.90, len(years)),
+                "component_a": 0.6 * np.abs(np.linspace(-1.0, 1.0, len(years))) ** 2,
+                "component_b": 0.4 * np.abs(np.linspace(-1.0, 1.0, len(years))) ** 2,
+                "peel": np.asarray(("Full", "Peel 1", "Peel 2", "Peel 3"))[row % 4],
+                "observed": depletion_a + 0.025 * np.sin(row * 1.7),
+                "predicted": depletion_a,
+                "procedure": np.asarray(("Constant catch", "HCR 40/10", "P*", "Fixed F"))[row % 4],
+                "average_catch": 80.0 + row * 4.0,
+                "probability_above_limit": np.clip(0.98 - row * 0.012, 0.20, 0.99),
+                "catch_cv": 0.08 + (row % 7) * 0.03,
+                "closure_probability": np.clip(0.05 + row * 0.015, 0.0, 1.0),
+                "nominal": np.asarray((0.50, 0.80, 0.90, 0.95))[row % 4],
+                "empirical": np.clip(np.asarray((0.48, 0.78, 0.87, 0.92))[row % 4] + 0.01 * np.sin(row), 0.0, 1.0),
+                "parameter": np.asarray(("K", "r", "depletion", "sigma"))[row % 4],
             }
         )
         self._set_frame(frame, None)
@@ -452,6 +863,8 @@ class ChartStudioApp:
         self.y_title.set("Relative biomass / depletion")
         self.lower_column.set("lower")
         self.upper_column.set("upper")
+        self._configure_chart_type()
+        self._schedule_live_preview()
 
     @staticmethod
     def _frame_from_json(payload: Any) -> pd.DataFrame:
@@ -593,6 +1006,17 @@ class ChartStudioApp:
             return factory.jitter_distribution(records, value_key=y_cols[0], group_key=group_col or x_col or y_cols[0], title=title)
         if chart_type == "Optimizer agreement":
             return factory.optimizer_agreement(records, x_key=x_col, y_key=y_cols[0], label_key=group_col or y_cols[0], title=title)
+        if chart_type == "Optimization surface / grid":
+            if not lower_col:
+                raise ValueError("Choose an objective or fitness column under Lower uncertainty / colour column.")
+            return factory.optimization_surface(
+                records,
+                x_key=x_col,
+                y_key=y_cols[0],
+                value_key=lower_col,
+                maximize=self.optimization_goal.get() == "maximize",
+                title=title,
+            )
         if chart_type == "Likelihood-component conflict":
             return factory.likelihood_conflict(records, component_key=group_col or x_col, value_key=y_cols[0], title=title)
         if chart_type == "Likelihood profile":

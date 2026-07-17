@@ -3,10 +3,12 @@ from __future__ import annotations
 import csv
 import json
 import threading
+import time
 import traceback
 from dataclasses import asdict, replace
 from pathlib import Path
-from tkinter import BOTH, END, LEFT, RIGHT, TOP, X, Y, Canvas, StringVar, Tk, filedialog, messagebox
+from queue import Empty, Queue
+from tkinter import BOTH, END, LEFT, RIGHT, TOP, X, Y, Canvas, DoubleVar, StringVar, Tk, filedialog, messagebox
 from tkinter import ttk
 from typing import Any, Callable
 
@@ -37,6 +39,31 @@ APP_TITLE = "Omega FISH Model — Integrated Assessment"
 ROOT = Path(__file__).resolve().parent
 
 
+class CollapsibleSection(ttk.Frame):
+    def __init__(self, parent, title: str, *, expanded: bool = True) -> None:
+        super().__init__(parent)
+        self.title = title
+        self.expanded = expanded
+        ttk.Separator(self).pack(fill=X, pady=(10, 4))
+        self.header = ttk.Button(self, command=self.toggle)
+        self.header.pack(fill=X)
+        self.body = ttk.Frame(self, padding=(2, 2, 2, 4))
+        if expanded:
+            self.body.pack(fill=X)
+        self._sync_label()
+
+    def toggle(self) -> None:
+        self.expanded = not self.expanded
+        if self.expanded:
+            self.body.pack(fill=X)
+        else:
+            self.body.pack_forget()
+        self._sync_label()
+
+    def _sync_label(self) -> None:
+        self.header.configure(text=f"{'▼' if self.expanded else '▶'}  {self.title}")
+
+
 class IntegratedAssessmentApp:
     def __init__(self, root: Tk) -> None:
         self.root = root
@@ -50,7 +77,23 @@ class IntegratedAssessmentApp:
         self.simulation: dict[str, Any] | None = None
         self.projection: dict[str, Any] | None = None
         self.mse: dict[str, Any] | None = None
+        self.dpird_synthetic_mode = False
         self.status = StringVar(value="Load a time-series dataset or generate the synthetic demonstration.")
+        self.progress_value = DoubleVar(value=0.0)
+        self.progress_text = StringVar(value="Ready")
+        self._typical_durations: dict[str, float] = {
+            "reconstruction": 4.0,
+            "fit": 35.0,
+            "projection": 25.0,
+            "mse": 50.0,
+            "reference": 8.0,
+            "other": 15.0,
+        }
+        self._task_running = False
+        self._cancel_event = threading.Event()
+        self._progress_updates: Queue[tuple[float, str]] = Queue()
+        self._last_exact_progress: float | None = None
+        self._last_progress_phase = ""
 
         self.max_age = StringVar(value="30")
         self.natural_mortality = StringVar(value="0.12")
@@ -77,70 +120,110 @@ class IntegratedAssessmentApp:
     def _build_ui(self) -> None:
         toolbar = ttk.Frame(self.root, padding=8)
         toolbar.pack(side=TOP, fill=X)
-        ttk.Button(toolbar, text="Load time series", command=self.load_dataset).pack(side=LEFT, padx=3)
-        ttk.Button(toolbar, text="Load age composition", command=self.load_age_composition).pack(side=LEFT, padx=3)
-        ttk.Button(toolbar, text="Load length composition", command=self.load_length_composition).pack(side=LEFT, padx=3)
-        ttk.Button(toolbar, text="Synthetic demonstration", command=self.load_synthetic).pack(side=LEFT, padx=3)
-        ttk.Button(toolbar, text="Export package", command=self.export_package).pack(side=LEFT, padx=12)
-        ttk.Label(toolbar, textvariable=self.status).pack(side=LEFT, padx=12)
+        toolbar_actions = ttk.Frame(toolbar)
+        toolbar_actions.pack(fill=X)
+        ttk.Button(toolbar_actions, text="Load time series", command=self.load_dataset).pack(side=LEFT, padx=3)
+        ttk.Button(toolbar_actions, text="Load age composition", command=self.load_age_composition).pack(side=LEFT, padx=3)
+        ttk.Button(toolbar_actions, text="Load length composition", command=self.load_length_composition).pack(side=LEFT, padx=3)
+        ttk.Button(toolbar_actions, text="Synthetic demonstration", command=self.load_synthetic).pack(side=LEFT, padx=3)
+        ttk.Button(toolbar_actions, text="DPIRD-like test data", command=self.load_dpird_synthetic).pack(side=LEFT, padx=3)
+        ttk.Button(toolbar_actions, text="Export package", command=self.export_package).pack(side=LEFT, padx=12)
+        status_label = ttk.Label(toolbar, textvariable=self.status, justify="left", anchor="w")
+        status_label.pack(fill=X, padx=3, pady=(7, 0))
+        progress_row = ttk.Frame(toolbar)
+        progress_row.pack(fill=X, padx=3, pady=(5, 0))
+        self.progress_bar = ttk.Progressbar(
+            progress_row,
+            orient="horizontal",
+            mode="determinate",
+            maximum=100.0,
+            variable=self.progress_value,
+        )
+        self.progress_bar.pack(side=LEFT, fill=X, expand=True)
+        self.stop_button = ttk.Button(progress_row, text="Stop", command=self._request_stop, state="disabled")
+        self.stop_button.pack(side=RIGHT, padx=(10, 0))
+        ttk.Label(progress_row, textvariable=self.progress_text, width=44, anchor="e").pack(side=RIGHT, padx=(10, 0))
+        toolbar.bind(
+            "<Configure>",
+            lambda event: status_label.configure(wraplength=max(300, event.width - 24)),
+        )
 
-        body = ttk.Panedwindow(self.root, orient="horizontal")
-        body.pack(fill=BOTH, expand=True)
-        controls = ttk.Frame(body, padding=10, width=310)
-        body.add(controls, weight=0)
-        main = ttk.Frame(body, padding=6)
-        body.add(main, weight=1)
+        self.body = ttk.Panedwindow(self.root, orient="horizontal")
+        self.body.pack(fill=BOTH, expand=True)
+        self.controls = ttk.Frame(self.body, padding=10, width=340)
+        self.body.add(self.controls, weight=0)
+        self.main = ttk.Frame(self.body, padding=6)
+        self.body.add(self.main, weight=1)
 
-        ttk.Label(controls, text="Age-structured model controls", font=("Segoe UI", 11, "bold")).pack(anchor="w", pady=(0, 7))
-        control_canvas = Canvas(controls, highlightthickness=0, width=290)
-        control_scroll = ttk.Scrollbar(controls, orient="vertical", command=control_canvas.yview)
-        control_inner = ttk.Frame(control_canvas)
-        control_inner.bind("<Configure>", lambda _event: control_canvas.configure(scrollregion=control_canvas.bbox("all")))
-        control_canvas.create_window((0, 0), window=control_inner, anchor="nw", width=280)
-        control_canvas.configure(yscrollcommand=control_scroll.set)
-        control_canvas.pack(side=LEFT, fill=BOTH, expand=True)
+        # An embedded workspace is built before it is mapped.  Without an
+        # explicit initial sash position, ttk can give the fixed-width control
+        # pane roughly half of the available window, leaving a large blank
+        # canvas and clipping the results notebook.  Set the sash after mapping
+        # so the results pane receives all remaining space.
+        self.body.bind("<Map>", lambda _event: self.body.after_idle(self._set_initial_control_width), add="+")
+
+        ttk.Label(self.controls, text="Age-structured model controls", font=("Segoe UI", 11, "bold")).pack(anchor="w", pady=(0, 7))
+        self.control_canvas = Canvas(self.controls, highlightthickness=0, width=320)
+        self.control_canvas.omega_role = "controls"  # type: ignore[attr-defined]
+        control_scroll = ttk.Scrollbar(self.controls, orient="vertical", command=self.control_canvas.yview)
+        control_inner = ttk.Frame(self.control_canvas)
+        control_inner.bind("<Configure>", lambda _event: self.control_canvas.configure(scrollregion=self.control_canvas.bbox("all")))
+        self.control_window = self.control_canvas.create_window((0, 0), window=control_inner, anchor="nw", width=315)
+
+        def resize_control_inner(event) -> None:
+            # Fill only the actual control pane.  This also prevents the raw
+            # white Tk canvas from appearing beside the fields in dark mode.
+            self.control_canvas.itemconfigure(self.control_window, width=max(250, event.width))
+
+        self.control_canvas.bind("<Configure>", resize_control_inner)
+        self.control_canvas.configure(yscrollcommand=control_scroll.set)
+        self.control_canvas.pack(side=LEFT, fill=BOTH, expand=True)
         control_scroll.pack(side=RIGHT, fill=Y)
+        self.root.bind_all("<MouseWheel>", self._control_mousewheel, add="+")
+        self.root.bind_all("<Button-4>", self._control_mousewheel, add="+")
+        self.root.bind_all("<Button-5>", self._control_mousewheel, add="+")
 
-        self._section(control_inner, "Population and recruitment")
-        self._entry(control_inner, "Maximum age / plus group", self.max_age)
-        self._entry(control_inner, "Natural mortality M", self.natural_mortality)
-        self._entry(control_inner, "Unfished recruitment R0", self.r0)
-        self._entry(control_inner, "Steepness h", self.steepness)
-        self._entry(control_inner, "Initial depletion", self.initial_depletion)
-        self._entry(control_inner, "Recruitment sigma", self.recruitment_sigma)
+        population = self._section(control_inner, "Population and recruitment", expanded=True)
+        self._entry(population, "Maximum age / plus group", self.max_age)
+        self._entry(population, "Natural mortality M", self.natural_mortality)
+        self._entry(population, "Unfished recruitment R0", self.r0)
+        self._entry(population, "Steepness h", self.steepness)
+        self._entry(population, "Initial depletion", self.initial_depletion)
+        self._entry(population, "Recruitment sigma", self.recruitment_sigma)
 
-        self._section(control_inner, "Growth, maturity and survey")
-        self._entry(control_inner, "Asymptotic length L∞ (mm)", self.linf)
-        self._entry(control_inner, "Growth k", self.growth_k)
-        self._entry(control_inner, "Maturity age 50%", self.maturity_a50)
-        self._entry(control_inner, "Survey selectivity age 50%", self.survey_a50)
+        growth = self._section(control_inner, "Growth, maturity and survey", expanded=False)
+        self._entry(growth, "Asymptotic length L∞ (mm)", self.linf)
+        self._entry(growth, "Growth k", self.growth_k)
+        self._entry(growth, "Maturity age 50%", self.maturity_a50)
+        self._entry(growth, "Survey selectivity age 50%", self.survey_a50)
 
-        self._section(control_inner, "Retention and post-release mortality")
-        self._entry(control_inner, "Retention length 50% (mm)", self.minimum_length)
-        self._entry(control_inner, "Discard / release mortality", self.discard_mortality)
+        retention = self._section(control_inner, "Retention and post-release mortality", expanded=False)
+        self._entry(retention, "Retention length 50% (mm)", self.minimum_length)
+        self._entry(retention, "Discard / release mortality", self.discard_mortality)
 
-        self._section(control_inner, "Estimation")
-        self._entry(control_inner, "Optimizer population", self.fit_population)
-        self._entry(control_inner, "Optimizer generations", self.fit_generations)
-        ttk.Button(control_inner, text="Run deterministic reconstruction", command=self.run_simulation).pack(fill=X, pady=3)
-        ttk.Button(control_inner, text="Fit integrated model", command=self.run_fit).pack(fill=X, pady=3)
-        ttk.Button(control_inner, text="Calculate equilibrium reference points", command=self.run_reference_points).pack(fill=X, pady=3)
+        estimation = self._section(control_inner, "Estimation", expanded=True)
+        self._entry(estimation, "Optimizer population", self.fit_population)
+        self._entry(estimation, "Optimizer generations", self.fit_generations)
+        ttk.Button(estimation, text="Run deterministic reconstruction", command=self.run_simulation).pack(fill=X, pady=3)
+        self.run_fit_button = ttk.Button(estimation, text="Fit integrated model", command=self.run_fit)
+        self.run_fit_button.pack(fill=X, pady=3)
+        ttk.Button(estimation, text="Calculate equilibrium reference points", command=self.run_reference_points).pack(fill=X, pady=3)
 
-        self._section(control_inner, "Projection and strategy testing")
-        self._entry(control_inner, "Projection years", self.projection_years)
-        self._entry(control_inner, "Projection simulations", self.projection_iterations)
-        ttk.Label(control_inner, text="Projection strategy").pack(anchor="w", pady=(5, 1))
+        projection = self._section(control_inner, "Projection and strategy testing", expanded=False)
+        self._entry(projection, "Projection years", self.projection_years)
+        self._entry(projection, "Projection simulations", self.projection_iterations)
+        ttk.Label(projection, text="Projection strategy").pack(anchor="w", pady=(5, 1))
         ttk.Combobox(
-            control_inner,
+            projection,
             textvariable=self.projection_strategy,
             values=["hcr_40_10", "fixed_f", "fixed_catch"],
             state="readonly",
         ).pack(fill=X)
-        self._entry(control_inner, "Fixed catch", self.fixed_catch)
-        self._entry(control_inner, "Fixed F", self.fixed_f)
-        self._entry(control_inner, "P*", self.pstar)
-        ttk.Button(control_inner, text="Run stochastic projection", command=self.run_projection).pack(fill=X, pady=3)
-        ttk.Button(control_inner, text="Run management strategy evaluation", command=self.run_mse).pack(fill=X, pady=3)
+        self._entry(projection, "Fixed catch", self.fixed_catch)
+        self._entry(projection, "Fixed F", self.fixed_f)
+        self._entry(projection, "P*", self.pstar)
+        ttk.Button(projection, text="Run stochastic projection", command=self.run_projection).pack(fill=X, pady=3)
+        ttk.Button(projection, text="Run management strategy evaluation", command=self.run_mse).pack(fill=X, pady=3)
 
         ttk.Label(
             control_inner,
@@ -152,7 +235,7 @@ class IntegratedAssessmentApp:
             justify="left",
         ).pack(anchor="w", pady=12)
 
-        self.notebook = ttk.Notebook(main)
+        self.notebook = ttk.Notebook(self.main)
         self.notebook.pack(fill=BOTH, expand=True)
         self.data_tab = ttk.Frame(self.notebook)
         self.history_tab = ttk.Frame(self.notebook)
@@ -166,14 +249,14 @@ class IntegratedAssessmentApp:
         self.log_tab = ttk.Frame(self.notebook)
         for tab, title in [
             (self.data_tab, "Data"),
-            (self.history_tab, "Biomass and F"),
-            (self.age_tab, "Age Structure"),
-            (self.curves_tab, "Selectivity and Retention"),
-            (self.sector_tab, "Sector Catch and Discards"),
-            (self.composition_tab, "Composition"),
-            (self.diagnostics_tab, "Fit Diagnostics"),
+            (self.history_tab, "Biomass & F"),
+            (self.age_tab, "Ages"),
+            (self.curves_tab, "Selectivity"),
+            (self.sector_tab, "Sectors"),
+            (self.composition_tab, "Compositions"),
+            (self.diagnostics_tab, "Diagnostics"),
             (self.projection_tab, "Projection"),
-            (self.mse_tab, "Strategy Evaluation"),
+            (self.mse_tab, "MSE"),
             (self.log_tab, "Log"),
         ]:
             self.notebook.add(tab, text=title)
@@ -198,24 +281,65 @@ class IntegratedAssessmentApp:
         self.age_comp_tree = self._tree(age_frame)
         self.length_comp_tree = self._tree(length_frame)
         self.diagnostics_tree = self._tree(self.diagnostics_tab)
+        projection_actions = ttk.Frame(self.projection_tab, padding=8)
+        projection_actions.pack(fill=X)
+        ttk.Button(projection_actions, text="FIT IF NEEDED + RUN PROJECTION", command=self.run_projection).pack(side=LEFT)
+        ttk.Label(projection_actions, text="Uses the current fitted model, or fits it automatically when no fit exists.").pack(side=LEFT, padx=10)
         projection_pane = ttk.Panedwindow(self.projection_tab, orient="vertical")
         projection_pane.pack(fill=BOTH, expand=True)
         projection_chart_frame = ttk.Frame(projection_pane)
         projection_table_frame = ttk.Frame(projection_pane)
         projection_pane.add(projection_chart_frame, weight=1)
         projection_pane.add(projection_table_frame, weight=1)
-        self.projection_canvas = Canvas(projection_chart_frame, background="white")
+        self.projection_canvas = Canvas(projection_chart_frame, background="#081522", highlightthickness=0)
         self.projection_canvas.pack(fill=BOTH, expand=True)
         self.projection_canvas.bind("<Configure>", lambda _event: self.draw_projection())
         self.projection_tree = self._tree(projection_table_frame)
+        mse_actions = ttk.Frame(self.mse_tab, padding=8)
+        mse_actions.pack(fill=X)
+        ttk.Button(mse_actions, text="FIT IF NEEDED + RUN MSE", command=self.run_mse).pack(side=LEFT)
+        ttk.Label(mse_actions, text="Runs the management procedures from the fitted model and reports the Pareto set.").pack(side=LEFT, padx=10)
         self.mse_tree = self._tree(self.mse_tab)
         self.log_text = __import__("tkinter").Text(self.log_tab, wrap="word", font=("Consolas", 10))
         self.log_text.pack(fill=BOTH, expand=True)
 
+    def _control_mousewheel(self, event):
+        try:
+            current = getattr(event, "widget", None)
+            inside = False
+            while current is not None:
+                if current in {self.controls, self.control_canvas}:
+                    inside = True
+                    break
+                current = getattr(current, "master", None)
+            pointer_x, pointer_y = self.root.winfo_pointerx(), self.root.winfo_pointery()
+            inside = inside or (
+                self.control_canvas.winfo_rootx() <= pointer_x < self.control_canvas.winfo_rootx() + self.control_canvas.winfo_width()
+                and self.control_canvas.winfo_rooty() <= pointer_y < self.control_canvas.winfo_rooty() + self.control_canvas.winfo_height()
+            )
+            if not inside:
+                return None
+            direction = -1 if getattr(event, "delta", 0) > 0 or getattr(event, "num", 0) == 4 else 1
+            self.control_canvas.yview_scroll(direction * 3, "units")
+            return "break"
+        except Exception:
+            return None
+
+    def _set_initial_control_width(self) -> None:
+        """Keep the control pane compact when the workspace is first shown."""
+
+        try:
+            available = self.body.winfo_width()
+            if available > 1:
+                self.body.sashpos(0, min(340, max(285, available // 3)))
+        except Exception:
+            pass
+
     @staticmethod
-    def _section(parent, text: str) -> None:
-        ttk.Separator(parent).pack(fill=X, pady=(10, 6))
-        ttk.Label(parent, text=text, font=("Segoe UI", 10, "bold")).pack(anchor="w")
+    def _section(parent, text: str, *, expanded: bool = True):
+        section = CollapsibleSection(parent, text, expanded=expanded)
+        section.pack(fill=X)
+        return section.body
 
     @staticmethod
     def _entry(parent, label: str, variable: StringVar) -> None:
@@ -238,10 +362,33 @@ class IntegratedAssessmentApp:
     def _settings(self) -> AgeStructuredSettings:
         discard = min(max(float(self.discard_mortality.get()), 0.0), 1.0)
         retention = float(self.minimum_length.get())
-        sectors = (
-            SectorSettings("commercial", "catch_commercial", 0.50, 5.0, 1.2, retention, 35.0, discard, 1.0),
-            SectorSettings("charter", "catch_charter", 0.15, 4.5, 1.3, retention, 35.0, discard, 1.0),
-            SectorSettings("recreational", "catch_recreational", 0.35, 4.0, 1.4, retention, 35.0, discard, 1.0),
+        if self.dpird_synthetic_mode:
+            sectors = (
+                SectorSettings("commercial", "catch_commercial", 0.40, 5.0, 1.2, retention, 35.0, discard, 1.0),
+                SectorSettings("charter", "catch_charter", 0.10, 5.0, 1.2, retention, 35.0, discard, 1.0),
+                SectorSettings("recreational", "catch_recreational", 0.50, 5.0, 1.2, retention, 35.0, discard, 1.0),
+            )
+        else:
+            sectors = (
+                SectorSettings("commercial", "catch_commercial", 0.50, 5.0, 1.2, retention, 35.0, discard, 1.0),
+                SectorSettings("charter", "catch_charter", 0.15, 4.5, 1.3, retention, 35.0, discard, 1.0),
+                SectorSettings("recreational", "catch_recreational", 0.35, 4.0, 1.4, retention, 35.0, discard, 1.0),
+            )
+        dpird_overrides = (
+            {
+                "growth_t0": 0.0,
+                "weight_a": 1.97e-8,
+                "weight_b": 2.980,
+                "maturity_slope": float((7.01 - 3.83) / np.log(19.0)),
+                "index_cv": 0.15,
+                "age_comp_weight": 0.05,
+                "length_comp_weight": 0.05,
+                "m_prior_median": 0.11,
+                "h_prior_mean": 0.75,
+                "initial_depletion_prior": 0.5194029850746269,
+            }
+            if self.dpird_synthetic_mode
+            else {}
         )
         return AgeStructuredSettings(
             max_age=max(int(self.max_age.get()), 2),
@@ -255,9 +402,23 @@ class IntegratedAssessmentApp:
             maturity_a50=float(self.maturity_a50.get()),
             survey_selectivity_a50=float(self.survey_a50.get()),
             sectors=sectors,
+            **dpird_overrides,
         )
 
     def _fit_settings(self) -> AgeFitSettings:
+        if getattr(self, "tutorial_quick_fit", False):
+            self.tutorial_quick_fit = False
+            return AgeFitSettings(
+                population=12,
+                generations=1,
+                local_rounds=1,
+                estimate_natural_mortality=False,
+                estimate_steepness=False,
+                estimate_initial_depletion=True,
+                estimate_survey_selectivity=False,
+                estimate_recruitment_sigma=False,
+                seed=8301,
+            )
         return AgeFitSettings(
             population=max(int(self.fit_population.get()), 12),
             generations=max(int(self.fit_generations.get()), 1),
@@ -293,15 +454,21 @@ class IntegratedAssessmentApp:
         if not path:
             return
         try:
+            self.dpird_synthetic_mode = False
             self.dataset = read_age_structured_file(path)
+            self.age_composition = None
+            self.length_composition = None
             self.result = None
             self.simulation = None
             self.projection = None
             self.mse = None
             self._populate_tree(self.data_tree, self.dataset.frame.where(self.dataset.frame.notna(), "").to_dict(orient="records"))
-            self.status.set(f"Loaded {self.dataset.name}: {len(self.dataset.frame)} years.")
+            self._show_loaded_compositions()
+            self.status.set(f"Loaded {self.dataset.name}: {len(self.dataset.frame)} years. Building the deterministic baseline...")
             self.notebook.select(self.data_tab)
+            self.run_simulation()
         except Exception as exc:
+            self.dpird_synthetic_mode = False
             messagebox.showerror(APP_TITLE, str(exc))
 
     def load_age_composition(self) -> None:
@@ -312,6 +479,7 @@ class IntegratedAssessmentApp:
             self.age_composition = read_composition_file(path)
             if "age" not in self.age_composition:
                 raise ValueError("Selected composition file does not contain an age column.")
+            self._show_loaded_compositions()
             self.status.set(f"Loaded {len(self.age_composition)} age-composition rows.")
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
@@ -324,12 +492,14 @@ class IntegratedAssessmentApp:
             self.length_composition = read_composition_file(path)
             if "length_mm" not in self.length_composition:
                 raise ValueError("Selected composition file does not contain a length_mm column.")
+            self._show_loaded_compositions()
             self.status.set(f"Loaded {len(self.length_composition)} length-composition rows.")
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
 
     def load_synthetic(self) -> None:
         try:
+            self.dpird_synthetic_mode = False
             settings = replace(self._settings(), max_age=min(max(int(self.max_age.get()), 8), 20), r0=max(float(self.r0.get()), 350_000.0))
             self.dataset, self.age_composition = synthetic_age_structured_dataset(30, settings, 1234)
             self.length_composition = None
@@ -338,32 +508,233 @@ class IntegratedAssessmentApp:
             self.projection = None
             self.mse = None
             self._populate_tree(self.data_tree, self.dataset.frame.where(self.dataset.frame.notna(), "").to_dict(orient="records"))
-            self.status.set("Synthetic age-structured demonstration loaded with age compositions.")
+            self._show_loaded_compositions()
+            self.status.set("Synthetic age-structured demonstration loaded. Building the deterministic baseline...")
             self.notebook.select(self.data_tab)
+            self.run_simulation()
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
 
+    def load_dpird_synthetic(self) -> None:
+        """Load the controlled DPIRD-like recovery dataset in one action."""
+
+        folder = ROOT / "Data_Sets" / "DPIRD" / "West_Australian_Dhufish" / "Synthetic_DPIRD_Like"
+        time_series = folder / "model_ready_timeseries_conditioned.csv"
+        age_file = folder / "age_composition.csv"
+        length_file = folder / "length_composition.csv"
+        missing = [path.name for path in (time_series, age_file, length_file) if not path.exists()]
+        if missing:
+            messagebox.showerror(
+                APP_TITLE,
+                "The DPIRD-like test dataset has not been built yet. Missing: " + ", ".join(missing),
+            )
+            return
+        try:
+            self.dpird_synthetic_mode = True
+            self.dataset = read_age_structured_file(time_series)
+            self.age_composition = read_composition_file(age_file)
+            self.length_composition = read_composition_file(length_file)
+            self.result = None
+            self.simulation = None
+            self.projection = None
+            self.mse = None
+            published_controls = {
+                self.max_age: "30",
+                self.natural_mortality: "0.11",
+                self.steepness: "0.75",
+                self.initial_depletion: "0.519403",
+                self.recruitment_sigma: "0.60",
+                self.linf: "983",
+                self.growth_k: "0.12",
+                self.maturity_a50: "3.83",
+                self.discard_mortality: "0.50",
+                self.minimum_length: "500",
+            }
+            for variable, value in published_controls.items():
+                variable.set(value)
+            # R0 is not public. This value belongs to the calibrated synthetic
+            # operating truth and must not be described as a DPIRD estimate.
+            metadata = json.loads((folder / "omega_dataset.json").read_text(encoding="utf-8"))
+            self.r0.set(str(metadata.get("synthetic_calibrated_r0", 261.45)))
+            self._populate_tree(self.data_tree, self.dataset.frame.where(self.dataset.frame.notna(), "").to_dict(orient="records"))
+            self._show_loaded_compositions()
+            self.status.set("Loaded the conditioned DPIRD-like synthetic recovery test. Original DPIRD source files were not changed.")
+            self.notebook.select(self.data_tab)
+            self.run_simulation()
+        except Exception as exc:
+            self.dpird_synthetic_mode = False
+            messagebox.showerror(APP_TITLE, str(exc))
+
+    def _show_loaded_compositions(self) -> None:
+        age_rows = []
+        if self.age_composition is not None:
+            age_rows = [{"series": "observed", **row} for row in self.age_composition.where(self.age_composition.notna(), "").to_dict(orient="records")]
+        length_rows = []
+        if self.length_composition is not None:
+            length_rows = [{"series": "observed", **row} for row in self.length_composition.where(self.length_composition.notna(), "").to_dict(orient="records")]
+        self._populate_tree(self.age_comp_tree, age_rows)
+        self._populate_tree(self.length_comp_tree, length_rows)
+
+    @staticmethod
+    def _combined_composition_rows(observed: pd.DataFrame | None, predicted: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        if observed is not None:
+            rows.extend({"series": "observed", **row} for row in observed.where(observed.notna(), "").to_dict(orient="records"))
+        rows.extend({"series": "predicted", **row} for row in predicted)
+        return rows
+
     def _run_background(self, label: str, work: Callable[[], Any], done: Callable[[Any], None]) -> None:
+        if self._task_running:
+            # Dataset injection and settings reset can request the same baseline
+            # while the first calculation is still finishing. Keep that a
+            # non-blocking status update; a modal here can strand a hidden or
+            # background workspace and make the desktop appear frozen.
+            self.status.set("A calculation is already running; the duplicate request was ignored.")
+            return
+        self._task_running = True
+        self._cancel_event.clear()
+        self._progress_updates = Queue()
+        self._last_exact_progress = None
+        self._last_progress_phase = ""
+        self.stop_button.configure(state="normal")
         self.status.set(label)
+        outcome: Queue[tuple[str, Any]] = Queue(maxsize=1)
+        started = time.perf_counter()
+        progress_key = self._progress_key(label)
+        estimate = max(self._typical_durations.get(progress_key, 15.0), 0.5)
+        self.progress_value.set(0.0)
+        self.progress_text.set("Estimated 0% • elapsed 00:00 • remaining calculating")
 
         def target() -> None:
             try:
-                result = work()
-                self.root.after(0, lambda: self._complete(done, result, label))
+                value = work()
+                outcome.put(("cancelled", None) if self._cancel_event.is_set() else ("ok", value))
+            except InterruptedError:
+                outcome.put(("cancelled", None))
             except Exception:
-                trace = traceback.format_exc()
-                self.root.after(0, lambda: self._failed(label, trace))
+                outcome.put(("error", traceback.format_exc()))
+
+        def poll() -> None:
+            elapsed = max(time.perf_counter() - started, 0.0)
+            exact_fraction: float | None = None
+            phase = ""
+            while True:
+                try:
+                    exact_fraction, phase = self._progress_updates.get_nowait()
+                except Empty:
+                    break
+            if exact_fraction is not None:
+                self._last_exact_progress = exact_fraction
+                self._last_progress_phase = phase
+            else:
+                exact_fraction = self._last_exact_progress
+                phase = self._last_progress_phase
+            try:
+                state, value = outcome.get_nowait()
+            except Empty:
+                if exact_fraction is None:
+                    percent = min(95.0, 100.0 * elapsed / estimate)
+                    remaining = max(estimate - elapsed, 0.0)
+                    prefix = "Estimated"
+                else:
+                    fraction = min(max(float(exact_fraction), 0.0), 0.99)
+                    percent = 100.0 * fraction
+                    remaining = elapsed * (1.0 - fraction) / fraction if fraction > 0.01 else estimate
+                    prefix = "Progress"
+                remaining_text = self._format_duration(remaining) if remaining > 0 else "re-estimating"
+                self.progress_value.set(percent)
+                self.progress_text.set(
+                    f"{prefix} {percent:3.0f}% • elapsed {self._format_duration(elapsed)} • remaining {remaining_text}"
+                )
+                if phase:
+                    self.status.set(phase)
+                try:
+                    if self.root.winfo_exists():
+                        self.root.after(250, poll)
+                except Exception:
+                    pass
+                return
+            if state == "ok":
+                self._complete(done, value, label, progress_key, elapsed)
+            elif state == "cancelled":
+                self._cancelled(label, elapsed)
+            else:
+                self._failed(label, str(value))
 
         threading.Thread(target=target, daemon=True).start()
+        self.root.after(100, poll)
 
-    def _complete(self, done: Callable[[Any], None], result: Any, label: str) -> None:
+    def _complete(
+        self,
+        done: Callable[[Any], None],
+        result: Any,
+        label: str,
+        progress_key: str,
+        elapsed: float,
+    ) -> None:
         done(result)
+        previous = self._typical_durations.get(progress_key, elapsed)
+        self._typical_durations[progress_key] = 0.65 * previous + 0.35 * max(elapsed, 0.1)
+        self.progress_value.set(100.0)
+        self.progress_text.set(f"100% complete • elapsed {self._format_duration(elapsed)}")
         self.status.set(label.replace("Running", "Completed"))
+        self._task_running = False
+        self.stop_button.configure(state="disabled")
 
     def _failed(self, label: str, trace: str) -> None:
         self.log(trace)
+        self.progress_value.set(0.0)
+        self.progress_text.set("Run failed — see the error message and log")
         self.status.set(f"Failed: {label}")
+        self._task_running = False
+        self.stop_button.configure(state="disabled")
         messagebox.showerror(APP_TITLE, trace.splitlines()[-1] if trace.splitlines() else trace)
+
+    def _cancelled(self, label: str, elapsed: float) -> None:
+        self.progress_value.set(0.0)
+        self.progress_text.set(f"Cancelled safely • elapsed {self._format_duration(elapsed)}")
+        self.status.set(f"Cancelled: {label}. The last completed result was kept.")
+        self._task_running = False
+        self.stop_button.configure(state="disabled")
+
+    def _request_stop(self) -> None:
+        if not self._task_running:
+            return
+        self._cancel_event.set()
+        self.stop_button.configure(state="disabled")
+        self.status.set("Stopping safely at the next calculation checkpoint...")
+        self.progress_text.set("Stop requested • preserving the last completed result")
+
+    def _is_cancel_requested(self) -> bool:
+        return self._cancel_event.is_set()
+
+    def _report_progress(self, fraction: float, phase: str) -> None:
+        try:
+            self._progress_updates.put_nowait((float(fraction), str(phase)))
+        except Exception:
+            pass
+
+    @staticmethod
+    def _progress_key(label: str) -> str:
+        value = label.lower()
+        if "management strategy" in value or "mse" in value:
+            return "mse"
+        if "projection" in value:
+            return "projection"
+        if "fit" in value:
+            return "fit"
+        if "reference" in value or "equilibrium" in value:
+            return "reference"
+        if "reconstruction" in value or "simulation" in value:
+            return "reconstruction"
+        return "other"
+
+    @staticmethod
+    def _format_duration(seconds: float) -> str:
+        total = max(int(round(seconds)), 0)
+        hours, remainder = divmod(total, 3600)
+        minutes, secs = divmod(remainder, 60)
+        return f"{hours:02d}:{minutes:02d}:{secs:02d}" if hours else f"{minutes:02d}:{secs:02d}"
 
     def run_simulation(self) -> None:
         try:
@@ -372,14 +743,23 @@ class IntegratedAssessmentApp:
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
             return
-        self._run_background("Running deterministic reconstruction...", lambda: simulate_age_structured(dataset, settings), self._show_simulation)
+        self._run_background(
+            "Running deterministic reconstruction...",
+            lambda: simulate_age_structured(
+                dataset,
+                settings,
+                cancel_check=self._is_cancel_requested,
+                progress_callback=self._report_progress,
+            ),
+            self._show_simulation,
+        )
 
     def _show_simulation(self, output: dict[str, Any]) -> None:
         self.simulation = output
         self.result = None
         self._populate_tree(self.sector_tree, output["sector_history"])
-        self._populate_tree(self.age_comp_tree, output["predicted_age_composition"][:2000])
-        self._populate_tree(self.length_comp_tree, [])
+        self._populate_tree(self.age_comp_tree, self._combined_composition_rows(self.age_composition, output["predicted_age_composition"][:2000]))
+        self._populate_tree(self.length_comp_tree, self._combined_composition_rows(self.length_composition, []))
         self.draw_history()
         self.draw_age_heatmap()
         self.draw_curves()
@@ -396,7 +776,15 @@ class IntegratedAssessmentApp:
             return
         self._run_background(
             "Running integrated age-structured fit...",
-            lambda: fit_age_structured(dataset, settings, fit_settings, self.age_composition, self.length_composition),
+            lambda: fit_age_structured(
+                dataset,
+                settings,
+                fit_settings,
+                self.age_composition,
+                self.length_composition,
+                cancel_check=self._is_cancel_requested,
+                progress_callback=self._report_progress,
+            ),
             self._show_fit,
         )
 
@@ -416,8 +804,8 @@ class IntegratedAssessmentApp:
         diagnostic_rows.extend({"component": key, "value": value} for key, value in result.best.items())
         self._populate_tree(self.diagnostics_tree, diagnostic_rows)
         self._populate_tree(self.sector_tree, result.sector_history)
-        self._populate_tree(self.age_comp_tree, result.predicted_age_composition[:2500])
-        self._populate_tree(self.length_comp_tree, result.predicted_length_composition[:2500])
+        self._populate_tree(self.age_comp_tree, self._combined_composition_rows(self.age_composition, result.predicted_age_composition[:2500]))
+        self._populate_tree(self.length_comp_tree, self._combined_composition_rows(self.length_composition, result.predicted_length_composition[:2500]))
         self.draw_history()
         self.draw_age_heatmap()
         self.draw_curves()
@@ -445,13 +833,60 @@ class IntegratedAssessmentApp:
         self.log(json.dumps({"reference_points": {key: value for key, value in output.items() if key != "grid"}}, indent=2))
 
     def run_projection(self) -> None:
+        if self.result is None:
+            self._fit_then_projection()
+            return
         try:
             result = self._require_result()
             settings = self._projection_settings()
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
             return
-        self._run_background("Running stochastic age-structured projection...", lambda: project_age_structured(result, settings), self._show_projection)
+        self._run_background(
+            "Running stochastic age-structured projection...",
+            lambda: project_age_structured(
+                result,
+                settings,
+                cancel_check=self._is_cancel_requested,
+                progress_callback=self._report_progress,
+            ),
+            self._show_projection,
+        )
+
+    def _fit_then_projection(self) -> None:
+        try:
+            dataset = self._require_dataset()
+            model_settings = self._settings()
+            fit_settings = self._fit_settings()
+            projection_settings = self._projection_settings()
+        except Exception as exc:
+            messagebox.showerror(APP_TITLE, str(exc))
+            return
+
+        def work():
+            fitted = fit_age_structured(
+                dataset,
+                model_settings,
+                fit_settings,
+                self.age_composition,
+                self.length_composition,
+                cancel_check=self._is_cancel_requested,
+                progress_callback=lambda value, phase: self._report_progress(0.75 * value, phase),
+            )
+            projection = project_age_structured(
+                fitted,
+                projection_settings,
+                cancel_check=self._is_cancel_requested,
+                progress_callback=lambda value, phase: self._report_progress(0.75 + 0.25 * value, phase),
+            )
+            return fitted, projection
+
+        self._run_background("Running model fit and stochastic projection...", work, self._show_fit_and_projection)
+
+    def _show_fit_and_projection(self, value) -> None:
+        fitted, projection = value
+        self._show_fit(fitted)
+        self._show_projection(projection)
 
     def _show_projection(self, output: dict[str, Any]) -> None:
         self.projection = output
@@ -461,6 +896,9 @@ class IntegratedAssessmentApp:
         self.log(json.dumps({"projection_risk": output["risk_summary"]}, indent=2))
 
     def run_mse(self) -> None:
+        if self.result is None:
+            self._fit_then_mse()
+            return
         try:
             result = self._require_result()
             years = max(int(self.projection_years.get()), 1)
@@ -468,7 +906,54 @@ class IntegratedAssessmentApp:
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
             return
-        self._run_background("Running management strategy evaluation...", lambda: run_management_strategy_evaluation(result, years, iterations), self._show_mse)
+        self._run_background(
+            "Running management strategy evaluation...",
+            lambda: run_management_strategy_evaluation(
+                result,
+                years,
+                iterations,
+                cancel_check=self._is_cancel_requested,
+                progress_callback=self._report_progress,
+            ),
+            self._show_mse,
+        )
+
+    def _fit_then_mse(self) -> None:
+        try:
+            dataset = self._require_dataset()
+            model_settings = self._settings()
+            fit_settings = self._fit_settings()
+            years = max(int(self.projection_years.get()), 1)
+            iterations = max(int(self.projection_iterations.get()) // 2, 80)
+        except Exception as exc:
+            messagebox.showerror(APP_TITLE, str(exc))
+            return
+
+        def work():
+            fitted = fit_age_structured(
+                dataset,
+                model_settings,
+                fit_settings,
+                self.age_composition,
+                self.length_composition,
+                cancel_check=self._is_cancel_requested,
+                progress_callback=lambda value, phase: self._report_progress(0.65 * value, phase),
+            )
+            mse = run_management_strategy_evaluation(
+                fitted,
+                years,
+                iterations,
+                cancel_check=self._is_cancel_requested,
+                progress_callback=lambda value, phase: self._report_progress(0.65 + 0.35 * value, phase),
+            )
+            return fitted, mse
+
+        self._run_background("Running model fit and management strategy evaluation...", work, self._show_fit_and_mse)
+
+    def _show_fit_and_mse(self, value) -> None:
+        fitted, mse = value
+        self._show_fit(fitted)
+        self._show_mse(mse)
 
     def _show_mse(self, output: dict[str, Any]) -> None:
         self.mse = output
@@ -512,9 +997,16 @@ class IntegratedAssessmentApp:
             if len(points) >= 4:
                 canvas.create_line(*points, fill=colour, width=2)
             canvas.create_text(width - margin - 150, 26 + 18 * series.index((key, label, colour)), anchor="w", text=f"{label} (scaled independently)", fill=colour)
-        canvas.create_line(margin, height - margin, width - margin, height - margin, fill="#555")
+        canvas.create_line(margin, height - margin, width - margin, height - margin, fill="#94a3b8")
+        canvas.create_line(margin, margin, margin, height - margin, fill="#94a3b8")
+        for tick in np.linspace(0.0, 1.0, 5):
+            y_tick = height - margin - tick * (height - 2 * margin)
+            canvas.create_line(margin - 4, y_tick, margin, y_tick, fill="#94a3b8")
+            canvas.create_text(margin - 8, y_tick, anchor="e", text=f"{tick:.2f}")
         canvas.create_text(margin, height - 25, anchor="w", text=str(int(years.min())))
         canvas.create_text(width - margin, height - 25, anchor="e", text=str(int(years.max())))
+        canvas.create_text(width / 2, height - 13, text="Year")
+        canvas.create_text(15, height / 2, text="Scaled value (0–1)", angle=90)
 
     def draw_age_heatmap(self) -> None:
         canvas = self.age_canvas
@@ -550,6 +1042,8 @@ class IntegratedAssessmentApp:
         canvas.create_text(20, height - margin_y, anchor="sw", text="Age 0")
         canvas.create_text(margin_x, height - 18, anchor="w", text=str(min(years)))
         canvas.create_text(width - margin_x, height - 18, anchor="e", text=str(max(years)))
+        canvas.create_text(width / 2, height - 10, text="Year")
+        canvas.create_text(11, height / 2, text="Age (years)", angle=90)
 
     def draw_curves(self) -> None:
         canvas = self.curves_canvas
@@ -580,13 +1074,15 @@ class IntegratedAssessmentApp:
         canvas.create_line(margin, margin, margin, height - margin, fill="#555")
         canvas.create_text(margin, height - 22, anchor="w", text="Age 0")
         canvas.create_text(width - margin, height - 22, anchor="e", text=f"Age {int(ages.max())}")
+        canvas.create_text(width / 2, height - 10, text="Age (years)")
+        canvas.create_text(14, height / 2, text="Proportion selected or retained", angle=90)
 
     def draw_projection(self) -> None:
         canvas = self.projection_canvas
         canvas.delete("all")
         rows = (self.projection or {}).get("projection", [])
         if not rows:
-            canvas.create_text(20, 20, anchor="nw", text="Run a stochastic projection to display depletion uncertainty.")
+            canvas.create_text(20, 20, anchor="nw", text="Select FIT IF NEEDED + RUN PROJECTION above to display depletion uncertainty.", fill="#dce8f2")
             return
         width = max(canvas.winfo_width(), 500)
         height = max(canvas.winfo_height(), 280)
@@ -599,18 +1095,31 @@ class IntegratedAssessmentApp:
         ymax = max(float(np.max(high)), 0.5)
         scale = lambda values: height - margin - np.asarray(values) / ymax * (height - 2 * margin)
         polygon = list(zip(x, scale(low))) + list(zip(x[::-1], scale(high[::-1])))
-        canvas.create_polygon(*[coordinate for pair in polygon for coordinate in pair], fill="#dbe9e4", outline="")
-        canvas.create_line(*[coordinate for pair in zip(x, scale(median)) for coordinate in pair], fill="#136f63", width=2)
+        canvas.create_polygon(*[coordinate for pair in polygon for coordinate in pair], fill="#173752", outline="")
+        canvas.create_line(*[coordinate for pair in zip(x, scale(median)) for coordinate in pair], fill="#42bff5", width=2)
         for level, colour, label in [(0.40, "#a66a1f", "Target 0.40"), (0.10, "#9b2d21", "Limit 0.10")]:
             y = float(scale([level])[0])
             canvas.create_line(margin, y, width - margin, y, fill=colour, dash=(5, 3))
             canvas.create_text(width - margin, y - 3, anchor="se", text=label, fill=colour)
-        canvas.create_text(margin, 18, anchor="w", text="Projected spawning-biomass depletion (P10–P90)", font=("Segoe UI", 12, "bold"))
+        canvas.create_line(margin, height - margin, width - margin, height - margin, fill="#94a3b8")
+        canvas.create_line(margin, margin, margin, height - margin, fill="#94a3b8")
+        for tick in np.linspace(0.0, ymax, 5):
+            y_tick = float(scale([tick])[0])
+            canvas.create_line(margin - 4, y_tick, margin, y_tick, fill="#94a3b8")
+            canvas.create_text(margin - 8, y_tick, anchor="e", text=f"{tick:.2f}", fill="#dce8f2")
+        canvas.create_text(margin, height - 25, anchor="w", text=str(int(years.min())), fill="#dce8f2")
+        canvas.create_text(width - margin, height - 25, anchor="e", text=str(int(years.max())), fill="#dce8f2")
+        canvas.create_text(width / 2, height - 12, text="Year", fill="#dce8f2")
+        canvas.create_text(14, height / 2, text="Relative spawning biomass (B/B0)", angle=90, fill="#dce8f2")
+        canvas.create_text(margin, 18, anchor="w", text="Projected spawning-biomass depletion (P10–P90)", fill="#dce8f2", font=("Segoe UI", 12, "bold"))
 
     def _populate_tree(self, tree: ttk.Treeview, rows: list[dict[str, Any]]) -> None:
         tree.delete(*tree.get_children())
         if not rows:
-            tree["columns"] = []
+            tree["columns"] = ("message",)
+            tree.heading("message", text="Status")
+            tree.column("message", width=700, anchor="w")
+            tree.insert("", END, values=("No result rows yet. Use the run button in this tab or load the required data.",))
             return
         columns: list[str] = []
         for row in rows:

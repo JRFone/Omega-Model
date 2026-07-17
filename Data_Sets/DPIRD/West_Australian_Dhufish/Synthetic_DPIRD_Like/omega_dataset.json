@@ -1,0 +1,37 @@
+{
+  "id": "dpird-wa-dhufish-synthetic-public-evidence-2025",
+  "display_name": "WA Dhufish \u2014 DPIRD-like controlled synthetic recovery test",
+  "description": "Known synthetic truth conditioned to the digitised public DPIRD depletion trajectory, with captured public catch and sampling schedules.",
+  "source": "Omega controlled simulation using captured DPIRD public evidence",
+  "source_url": "https://library.dpird.wa.gov.au/fish_rar/2/",
+  "difficulty": "Intermediate",
+  "model_type": "Age structured",
+  "primary_file": "model_ready_timeseries_conditioned.csv",
+  "blind_test_file": "model_ready_timeseries_blind.csv",
+  "age_composition": "age_composition.csv",
+  "length_composition": "length_composition.csv",
+  "truth_file": "synthetic_truth.csv",
+  "synthetic_calibrated_r0": 261.4458145820423,
+  "data_types": [
+    "catch",
+    "CPUE/index",
+    "age",
+    "length",
+    "sector catch",
+    "known truth",
+    "recruitment deviations"
+  ],
+  "recommended_tools": [
+    "Integrated Assessment",
+    "Diagnostics",
+    "Retrospective",
+    "ASPM",
+    "Likelihood Profiles"
+  ],
+  "expected_behavior": "Conditioned run should reproduce the known synthetic trajectory closely; blind run exposes the current recruitment-structure limitation.",
+  "raw_dpird_dataset": false,
+  "original_dpird_inputs_available": false,
+  "synthetic": true,
+  "random_seed": 20250717,
+  "scientific_warning": "This must never be described as DPIRD raw data, an accepted assessment, or proof that DPIRD biomass is correct or incorrect."
+}

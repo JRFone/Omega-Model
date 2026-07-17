@@ -1,0 +1,30 @@
+parameter,value,units,scope,evidence_class,source,notes
+species,WA Dhufish,text,all,published_exact,FRR346 Table 4.3,Species identity
+max_observed_age,41,years,all,published_exact,FRR346 Table 4.3,"Observed maximum, not model plus group"
+model_plus_group,30,years,all,published_exact,FOP151 Table 4A.1,Bespoke/bridge model 30+ group
+natural_mortality_M,0.11,year^-1,all,published_exact,FRR346 Table 4.3; FOP151 Table 4A.1,Fixed base value
+steepness_h,0.75,unitless,all,published_exact,FOP151 Table 4A.1,Fixed base value
+recruitment_sigma,0.6,log scale,all,published_exact,FOP151 Table 4A.1,Fixed base value
+growth_Linf,983,mm TL,female,published_exact,FRR346 Table 4.3,von Bertalanffy
+growth_k,0.12,year^-1,female,published_exact,FRR346 Table 4.3,von Bertalanffy
+growth_t0,0.0,years,female,published_exact,FRR346 Table 4.3,von Bertalanffy
+growth_Linf,1119,mm TL,male,published_exact,FRR346 Table 4.3,von Bertalanffy
+growth_k,0.11,year^-1,male,published_exact,FRR346 Table 4.3,von Bertalanffy
+growth_t0,0.0,years,male,published_exact,FRR346 Table 4.3,von Bertalanffy
+weight_length_a,1.97e-05,g/mm^b,all,published_exact,FRR346 Table 4.3,W(g)=a TL(mm)^b
+weight_length_a_omega,1.97e-08,kg/mm^b,all,derived_unit_conversion,FRR346 Table 4.3,Published coefficient converted grams to kilograms
+weight_length_b,2.98,unitless,all,published_exact,FRR346 Table 4.3,W=aL^b
+maturity_A50,3.83,years,female,published_exact,FRR346 Table 4.3,Age at 50% mature
+maturity_A95,7.01,years,female,published_exact,FRR346 Table 4.3,Age at 95% mature
+maturity_logistic_slope,1.0800020046264454,years,female,derived_parameterisation,FRR346 Table 4.3,Omega slope=(A95-A50)/ln(19)
+maturity_A50,3.37,years,male,published_exact,FRR346 Table 4.3,Age at 50% mature
+maturity_A95,5.22,years,male,published_exact,FRR346 Table 4.3,Age at 95% mature
+post_release_mortality,0.5,proportion,all,published_exact,RAR2 model description; FOP151,Base assumption; depth-specific uncertainty remains
+historical_retention_length,500,mm TL,all,published_rule,FOP151 review response,Historical minimum legal length; removed in 2023
+model_start_year,1965,year,all,published_exact,FOP151 Table 4A.1,Ten-year burn-in before catch series
+catch_start_year,1975,year,all,published_exact,RAR2 Figure 3.15; FOP151,Modelled retained catches
+initial_F_lower_bound,0.03,year^-1,all,published_exact,FOP151 Table 4A.1,Initial fishing mortality parameter bound
+initial_F_upper_bound,0.07,year^-1,all,published_exact,FOP151 Table 4A.1,Initial fishing mortality parameter bound
+selectivity_A50,,years,all,not_publicly_available,FOP151,"Selectivity form is described, exact fitted curve parameters are not public"
+unfished_recruitment_R0,,fish,area,not_publicly_available,RAR2/FOP151,Must be estimated; no public raw run file located
+initial_depletion,,proportion,area,not_publicly_available,RAR2/FOP151,Do not substitute initial F bounds for depletion

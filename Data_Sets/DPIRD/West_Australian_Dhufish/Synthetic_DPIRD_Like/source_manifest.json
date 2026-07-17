@@ -1,0 +1,98 @@
+{
+  "generated_utc": "2026-07-17T14:23:38.684515+00:00",
+  "builder": "tools\\build_dpird_dhufish_synthetic_dataset.py",
+  "random_seed": 20250717,
+  "official_source": "https://library.dpird.wa.gov.au/fish_rar/2/",
+  "files": [
+    {
+      "path": "age_composition.csv",
+      "bytes": 52494,
+      "sha256": "0b342e7f44279ea41b470ea45ae01867bcbcd420d3f5d71ddc98f92df28df90c"
+    },
+    {
+      "path": "calibration_metrics.json",
+      "bytes": 705,
+      "sha256": "0db9dbd6dfc4a4db2417ade7cc3926a65d394f9335d6e07764254a2a631e12ac"
+    },
+    {
+      "path": "captured_age_composition_by_area_digitised.csv",
+      "bytes": 112435,
+      "sha256": "57429b0d23561579f9671e66ce759200f87cf9a7555176d46583334bd896e9cf"
+    },
+    {
+      "path": "captured_age_composition_digitised.csv",
+      "bytes": 84914,
+      "sha256": "4c417606c76d8cf8fcf2b622f18827edb8f23d2856356ca6a73b7ebb23719bc7"
+    },
+    {
+      "path": "captured_public_timeseries.csv",
+      "bytes": 14537,
+      "sha256": "59aaf044df47cab96baa22e1b77284e747fc849daf91a22bf9cac4c9be829e18"
+    },
+    {
+      "path": "captured_published_assessment_outputs_digitised.csv",
+      "bytes": 9681,
+      "sha256": "193d499aa55d1e2594ea077f7c36580cc05fb184c3ac1cfa2e6bc9f8c6005e43"
+    },
+    {
+      "path": "Charts/01_depletion_truth_vs_dpird.html",
+      "bytes": 4865132,
+      "sha256": "708133e8b5fff3254c9f16357c040b5c7052ae7284efa3dd0ad21d897027087b"
+    },
+    {
+      "path": "Charts/02_cpue_comparison.html",
+      "bytes": 4865033,
+      "sha256": "8ec21b37699c98bc9389c792cd53bbb3cfb7432e8971bad0626c8cbe66c715a8"
+    },
+    {
+      "path": "Charts/03_catch_history.html",
+      "bytes": 4863996,
+      "sha256": "f656f18d1bafc93014def89d6c72bf9631d522b619e515dc8375c5fdf5e5ac86"
+    },
+    {
+      "path": "Charts/04_recruitment_deviations.html",
+      "bytes": 4866120,
+      "sha256": "4fae1ef842789e54774a53d37daaae6a9205ee1ed14cb1120e9a600287f76170"
+    },
+    {
+      "path": "Charts/05_age_composition_heatmap.html",
+      "bytes": 4871309,
+      "sha256": "5ee8c4da9786deceeab145fc8d2b33f8da992023b8c6dc2854480d00a359a663"
+    },
+    {
+      "path": "length_composition.csv",
+      "bytes": 33470,
+      "sha256": "f0a8ae3546b891a531a2d487db4c3d536ad3993f5b00d525326d1cc947ad8be8"
+    },
+    {
+      "path": "model_ready_timeseries_blind.csv",
+      "bytes": 10719,
+      "sha256": "62e4a12e631934b5b54d7c11389c976173f4fb7657fe75b4b1bb25e9f180b305"
+    },
+    {
+      "path": "model_ready_timeseries_conditioned.csv",
+      "bytes": 11883,
+      "sha256": "8c070a36c77942b59c06399a7577632fb969fdcb1d4af42306ed126655b575ea"
+    },
+    {
+      "path": "omega_dataset.json",
+      "bytes": 1567,
+      "sha256": "c799c672f74fccfe3b4679f1a1871cc376f039a5b37d11b275e1da56506b375f"
+    },
+    {
+      "path": "parameter_register.csv",
+      "bytes": 1243,
+      "sha256": "bf28ec06a7ccb690deab91091565dc556ab743ead8bce59986db5885bd40d831"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1954,
+      "sha256": "92e3e3c01b9d333cfeb800a8ef1d18c5697e78a72b3ad40ce708c69985af246c"
+    },
+    {
+      "path": "synthetic_truth.csv",
+      "bytes": 13853,
+      "sha256": "b0c9f30a28ff34f5b582fe263844e8fd6ff4e14521221e9e6219b00cebc1ca2d"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-07-17T13:22:08.380508+00:00",
+  "notice": "Official NOAA/NMFS scientific repositories are preserved as local validation snapshots. Their contents are provided as-is by their respective maintainers.",
+  "repositories": [
+    {
+      "repository": "ss3-test-models",
+      "url": "https://github.com/nmfs-ost/ss3-test-models",
+      "purpose": "Official Stock Synthesis regression and feature test models",
+      "branch": "main",
+      "commit_sha": "3d1f9c0aad7e439a73bd807b02d0ffe4d7b3b944",
+      "downloaded_at": "2026-07-17T13:22:05.202241+00:00",
+      "file_count": 152,
+      "total_bytes": 3731886,
+      "licence_file": "LICENSE",
+      "local_path": "Data_Sets/NOAA/_sources/ss3-test-models"
+    },
+    {
+      "repository": "ss3-user-examples",
+      "url": "https://github.com/nmfs-ost/ss3-user-examples",
+      "purpose": "Official Stock Synthesis example models for users",
+      "branch": "main",
+      "commit_sha": "a003521a27590e020096cdacc3b7d5359f5cc3de",
+      "downloaded_at": "2026-07-17T13:22:08.380436+00:00",
+      "file_count": 50,
+      "total_bytes": 1105473,
+      "licence_file": "LICENSE",
+      "local_path": "Data_Sets/NOAA/_sources/ss3-user-examples"
+    }
+  ]
+}

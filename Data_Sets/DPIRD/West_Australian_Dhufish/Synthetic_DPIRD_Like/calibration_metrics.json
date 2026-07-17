@@ -1,0 +1,15 @@
+{
+  "optimizer_success": true,
+  "optimizer_status": 2,
+  "optimizer_message": "`ftol` termination condition is satisfied.",
+  "objective_evaluations": 529,
+  "calibrated_synthetic_r0": 261.4458145820423,
+  "target_trajectory_rmse": 0.020130072702310684,
+  "target_trajectory_max_absolute_error": 0.06833476518052423,
+  "terminal_operating_truth_depletion": 0.1492395606000156,
+  "terminal_digitised_dpird_depletion": 0.1492537313432835,
+  "terminal_absolute_error": 1.4170743267899466e-05,
+  "log_recruitment_deviation_min": -0.9929491634115588,
+  "log_recruitment_deviation_max": 1.2569469513950124,
+  "scientific_status": "synthetic_conditioned_operating_truth_not_raw_dpird_assessment"
+}

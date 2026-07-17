@@ -19,6 +19,7 @@ from stock_model.age_structured import (
     simulate_age_structured,
     synthetic_age_structured_dataset,
 )
+from stock_model.data_io import StockDataset
 
 
 CSV = """year,catch,index,biomass,catch_commercial,catch_charter,catch_recreational,recruitment_multiplier
@@ -77,6 +78,52 @@ class AgeStructuredTests(unittest.TestCase):
         self.assertLess(total_mismatch, total_observed * 1e-5)
         self.assertGreater(sum(row["dead_discard_biomass"] for row in output["history"]), 0.0)
         self.assertEqual(len(output["age_structure"]), 10 * 11)
+
+    def test_year_specific_retention_override_changes_only_configured_year(self):
+        base = simulate_age_structured(self.dataset, self.settings)
+        frame = self.dataset.frame.copy()
+        frame["retention_length50_recreational"] = np.nan
+        frame.loc[frame["year"] == frame["year"].max(), "retention_length50_recreational"] = 250.0
+        changed_dataset = StockDataset(
+            name="age-test-time-varying-retention",
+            frame=frame,
+            provenance=self.dataset.provenance,
+            transformations=self.dataset.transformations,
+            warnings=self.dataset.warnings,
+            raw_columns=self.dataset.raw_columns,
+            index_columns=self.dataset.index_columns,
+        )
+        changed = simulate_age_structured(changed_dataset, self.settings)
+        self.assertAlmostEqual(base["history"][-2]["f_scalar"], changed["history"][-2]["f_scalar"], places=10)
+        self.assertNotAlmostEqual(base["history"][-1]["f_scalar"], changed["history"][-1]["f_scalar"], places=6)
+
+    def test_absolute_recruitment_multiplier_is_not_median_normalised(self):
+        frame = self.dataset.frame.copy()
+        frame["recruitment_multiplier_absolute"] = 1.0
+        frame.loc[frame.index[0], "recruitment_multiplier_absolute"] = 2.0
+        exact_dataset = StockDataset(
+            name="absolute-recruitment-test",
+            frame=frame,
+            provenance=self.dataset.provenance,
+            transformations=self.dataset.transformations,
+            warnings=self.dataset.warnings,
+            raw_columns=self.dataset.raw_columns,
+            index_columns=self.dataset.index_columns,
+        )
+        output = simulate_age_structured(exact_dataset, self.settings)
+        self.assertAlmostEqual(output["history"][1]["recruitment_deviation"], np.log(2.0), places=10)
+
+    def test_progress_reporting_and_safe_cancellation(self):
+        progress: list[tuple[float, str]] = []
+        simulate_age_structured(
+            self.dataset,
+            self.settings,
+            progress_callback=lambda value, phase: progress.append((value, phase)),
+        )
+        self.assertTrue(progress)
+        self.assertAlmostEqual(progress[-1][0], 1.0)
+        with self.assertRaises(InterruptedError):
+            simulate_age_structured(self.dataset, self.settings, cancel_check=lambda: True)
 
     def test_composition_normalisation(self):
         import pandas as pd

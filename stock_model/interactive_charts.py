@@ -480,6 +480,81 @@ class InteractiveChartFactory:
         figure.update_layout(**layout)
         return figure
 
+    def optimization_surface(
+        self,
+        rows: Sequence[Mapping[str, Any]],
+        *,
+        x_key: str,
+        y_key: str,
+        value_key: str,
+        maximize: bool = False,
+        title: str = "Parameter optimization surface",
+    ):
+        """MetaTrader-style parameter grid with an explicit best combination."""
+
+        go, _make_subplots, _pio = _plotly()
+        valid: list[tuple[float, float, float]] = []
+        for row in rows:
+            x_value = _as_float(row.get(x_key))
+            y_value = _as_float(row.get(y_key))
+            score = _as_float(row.get(value_key))
+            if x_value is not None and y_value is not None and score is not None:
+                valid.append((x_value, y_value, score))
+        if not valid:
+            raise ValueError("The optimization grid needs numeric X parameter, Y parameter and objective/fitness values.")
+        x_values = sorted({row[0] for row in valid})
+        y_values = sorted({row[1] for row in valid})
+        x_lookup = {value: index for index, value in enumerate(x_values)}
+        y_lookup = {value: index for index, value in enumerate(y_values)}
+        cells: dict[tuple[int, int], list[float]] = {}
+        for x_value, y_value, score in valid:
+            cells.setdefault((y_lookup[y_value], x_lookup[x_value]), []).append(score)
+        matrix = np.full((len(y_values), len(x_values)), np.nan, dtype=float)
+        for (row_index, column_index), values in cells.items():
+            matrix[row_index, column_index] = float(np.mean(values))
+        best = max(valid, key=lambda row: row[2]) if maximize else min(valid, key=lambda row: row[2])
+        figure = go.Figure()
+        figure.add_trace(
+            go.Heatmap(
+                x=x_values,
+                y=y_values,
+                z=matrix,
+                colorscale="Viridis" if maximize else "Viridis_r",
+                colorbar={"title": value_key.replace("_", " ").title()},
+                hovertemplate=(
+                    f"{x_key}=%{{x:.6g}}<br>{y_key}=%{{y:.6g}}<br>"
+                    f"{value_key}=%{{z:.6g}}<extra></extra>"
+                ),
+            )
+        )
+        figure.add_trace(
+            go.Scatter(
+                x=[best[0]],
+                y=[best[1]],
+                mode="markers+text",
+                text=[f"Best: {best[2]:.6g}"],
+                textposition="top center",
+                name="Best parameter set",
+                marker={"symbol": "star", "size": 18, "color": self.profile.palette[1], "line": {"width": 2, "color": self.profile.palette[-1]}},
+                hovertemplate=f"Best<br>{x_key}=%{{x:.6g}}<br>{y_key}=%{{y:.6g}}<br>{value_key}={best[2]:.6g}<extra></extra>",
+            )
+        )
+        layout = self._base_layout(title, x_key.replace("_", " ").title(), y_key.replace("_", " ").title())
+        layout["xaxis"]["rangeslider"] = {"visible": False}
+        layout["annotations"] = [
+            {
+                "xref": "paper",
+                "yref": "paper",
+                "x": 0,
+                "y": 1.08,
+                "showarrow": False,
+                "xanchor": "left",
+                "text": f"Goal: {'maximize' if maximize else 'minimize'} {value_key.replace('_', ' ')}",
+            }
+        ]
+        figure.update_layout(**layout)
+        return figure
+
     def jitter_distribution(
         self,
         runs: Sequence[Mapping[str, Any]],

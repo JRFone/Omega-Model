@@ -1,0 +1,17 @@
+parameter,value,units,evidence_class,source
+maximum age / plus group,30.0,years,published,RAR2 Table 3.7
+natural mortality M,0.11,per year,published,RAR2 Table 3.7
+steepness h,0.75,proportion,published fixed,RAR2 Table 3.7
+recruitment sigma,0.6,log scale,published fixed,RAR2 Table 3.7
+female Linf,983.0,mm,published,RAR2 Table 3.7
+female growth k,0.12,per year,published,RAR2 Table 3.7
+female maturity A50,3.83,years,published,RAR2 Table 3.7
+female maturity A95,7.01,years,published,RAR2 Table 3.7
+weight-length a,1.97e-08,kg and mm,published converted from grams,RAR2 Table 3.7
+weight-length b,2.98,dimensionless,published,RAR2 Table 3.7
+post-release mortality,0.5,proportion,published working value,RAR2/FOP151
+historical retention L50,500.0,mm,published historical legal-size proxy,RAR2/FOP151
+initial depletion,0.5194029850746269,B/B0,synthetic target from digitised 1975 WCB trajectory,RAR2 Figure 3.21
+R0,261.4458145820423,recruits,synthetic calibrated; not a DPIRD estimate,Omega calibration
+fleet selectivity A50,5.0,years,synthetic working assumption; fitted DPIRD values unavailable,Omega calibration
+fleet selectivity slope,1.2,years,synthetic working assumption; fitted DPIRD values unavailable,Omega calibration

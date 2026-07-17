@@ -1,5 +1,7 @@
 # Python
 __pycache__/
+Data_Sets/NOAA/_sources/
+Data_Sets/Working_Copies/
 *.py[cod]
 *.pyo
 .pytest_cache/
@@ -11,8 +13,13 @@ build/
 dist/
 release/
 reports/
+outputs/
+tmp/
+logs/
 validation_cache/
-tools/
+tools/ss3/
+tools/*.exe
+tools/*.zip
 ss3_download_manifest.json
 stock_model/native_libs/*.dll
 stock_model/native_libs/*.so
