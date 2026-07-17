@@ -496,7 +496,7 @@ It is **not** the full DPIRD assessment dataset. DPIRD's raw annual input tables
 
 ## Omega-ready files
 
-- `Omega_Ready/dpird_wa_dhufish_public_reconstruction.csv`: annual retained catch by sector and published CPUE series.
+- `Omega_Ready/dpird_wa_dhufish_public_reconstruction.csv`: annual retained catch by sector and published CPUE series. The raw digitised black total curve is retained separately where figure overlap requires reconciliation to the sector sum.
 - `Omega_Ready/catch_by_area_sector.csv`: published coloured area shares, reconciled to the independently digitised sector totals; reconstructed grey bars retain an unknown area.
 - `Omega_Ready/age_composition.csv`: sample-size-weighted North/South public age-composition reconstruction.
 - `Omega_Ready/age_composition_by_area.csv`: the separate public North and South reconstructions.

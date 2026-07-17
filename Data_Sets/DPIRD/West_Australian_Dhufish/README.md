@@ -10,13 +10,12 @@ It is **not** the full DPIRD assessment dataset. DPIRD's raw annual input tables
 - `published_rule`: a documented regulation or modelling rule.
 - `derived_unit_conversion` / `derived_parameterisation`: a transparent mathematical conversion of an exact value.
 - `digitised_from_published_figure`: an approximate value recovered from pixels in an official figure.
-- `vector_extracted_from_published_figure`: an approximate value recovered from the plotted vector path and calibrated against the published axes.
 - `not_publicly_available`: required information that must not be invented.
 
 ## Omega-ready files
 
-- `Omega_Ready/dpird_wa_dhufish_public_reconstruction.csv`: annual retained catch by sector and published CPUE series.
-- `Omega_Ready/catch_by_area_sector.csv`: commercial, recreational and charter sector totals extracted from the published vector curves. Public area splits are deliberately marked `not_resolved` rather than invented.
+- `Omega_Ready/dpird_wa_dhufish_public_reconstruction.csv`: annual retained catch by sector and published CPUE series. The raw digitised black total curve is retained separately where figure overlap requires reconciliation to the sector sum.
+- `Omega_Ready/catch_by_area_sector.csv`: published coloured area shares, reconciled to the independently digitised sector totals; reconstructed grey bars retain an unknown area.
 - `Omega_Ready/age_composition.csv`: sample-size-weighted North/South public age-composition reconstruction.
 - `Omega_Ready/age_composition_by_area.csv`: the separate public North and South reconstructions.
 - `Omega_Ready/published_assessment_outputs_digitised.csv`: digitised DPIRD central biomass, fishing-mortality and recruitment-deviation trajectories for benchmark comparison.

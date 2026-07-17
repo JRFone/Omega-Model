@@ -27,11 +27,12 @@
   "original_or_working_copy": "public reconstruction; original PDFs preserved",
   "raw_dpird_dataset": false,
   "validation_checks": [
-    "2024 vector-extracted retained catch 136.83 t agrees with the published rounded 137 t",
+    "2024 digitised retained catch 136.4 t agrees within 5 t of published 137 t",
     "Primary daily CPUE composite is normalised to 1.0 in 2008",
     "All area age compositions sum to 1.0",
     "All pooled age compositions sum to 1.0",
     "All available area catch components reconcile to annual sector totals",
+    "Every annual retained-catch total equals commercial + charter + recreational components",
     "Digitised Figure 3.21 terminal WCB relative spawning biomass is 0.149, consistent with published 0.15"
   ]
 }

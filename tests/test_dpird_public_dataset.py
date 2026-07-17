@@ -19,7 +19,17 @@ def test_dpird_public_reconstruction_is_model_ready_and_labelled() -> None:
     assert annual["year"].tolist() == list(range(1975, 2025))
     assert abs(float(annual.loc[annual["year"] == 2024, "catch"].iloc[0]) - 137.0) < 5.0
     assert set(annual["dataset_status"]) == {"public_evidence_reconstruction_not_raw_dpird_data"}
-    assert set(annual["catch_evidence_class"]) == {"vector_extracted_from_published_figure"}
+    assert set(annual["catch_evidence_class"]).issubset(
+        {
+            "digitised_from_published_figure",
+            "digitised_sector_sum_reconciled_where_total_curve_obscured",
+        }
+    )
+    assert np.allclose(
+        annual["catch"].to_numpy(),
+        annual[["catch_commercial", "catch_charter", "catch_recreational"]].sum(axis=1).to_numpy(),
+    )
+    assert {"catch_total_curve_digitised", "catch_total_reconciliation_t"}.issubset(annual.columns)
     assert np.isclose(float(annual.loc[annual["year"] == 2008, "index"].iloc[0]), 1.0)
     loaded = read_age_structured_file(READY / "dpird_wa_dhufish_public_reconstruction.csv")
     assert len(loaded.frame) == 50
