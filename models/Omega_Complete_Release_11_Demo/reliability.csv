@@ -1,0 +1,9 @@
+diagnostic,explanation,impact,status,threshold,value
+Maximum gradient,Large gradients indicate the optimiser may not have reached a stationary solution.,High,PASS,≤0.001 preferred,0.000788954501729222
+Hessian,"A non-positive Hessian can indicate a saddle point, flat ridge or unquantified uncertainty.",High,PASS,Positive definite,True
+Retrospective bias,Persistent retrospective revisions weaken confidence in terminal stock status.,High,PASS,|Mohn rho| ≤0.15 preferred,0.08
+Predictive holdout,A model that cannot predict omitted observations may be fitting history without capturing process.,High,PASS,≤20% relative error preferred,0.18
+Data conflict,Strongly contradictory data sources force the model to compromise or rely on weights and assumptions.,High,WARN,"<15 low, 15–35 moderate, >35 high",32.561976731249395
+Parameter conditioning,Large condition numbers indicate weakly identified parameter combinations.,Medium,PASS,"<100,000 preferred",12.022851280511201
+Boundary parameters,Boundary estimates can indicate insufficient information or restrictive parameter ranges.,Medium,PASS,0 preferred,0
+Optimizer agreement,Different optimisers should reach materially similar solutions.,High,PASS,Terminal depletion spread ≤0.03,0.02

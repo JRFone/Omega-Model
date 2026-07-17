@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omega-fish-model"
+version = "1.4.1"
+description = "Integrated fish stock assessment, quantitative diagnostics, uncertainty and management strategy evaluation platform"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.1",
+  "openpyxl>=3.1",
+  "plotly>=5.18",
+  "scipy>=1.11",
+]
+
+[project.scripts]
+omega-fish = "omega_cli:main"
+omega-fish-self-check = "omega_self_check:main"
+
+[tool.setuptools]
+py-modules = [
+  "omega_cli",
+  "omega_self_check",
+  "omega_desktop",
+  "omega_complete_app",
+  "noaa_validation_app",
+  "integrated_assessment_app",
+  "quant_lab_app",
+  "expert_workflow_app",
+  "chart_studio_app",
+  "priority_diagnostics_app",
+  "mse_truth_lab_app",
+  "build_native_backend",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["stock_model*"]

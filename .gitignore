@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# Omega local environments and generated output
+.venv/
+build/
+dist/
+release/
+reports/
+validation_cache/
+tools/
+ss3_download_manifest.json
+stock_model/native_libs/*.dll
+stock_model/native_libs/*.so
+stock_model/native_libs/*.dylib
+stock_model/native_libs/native_build.json
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

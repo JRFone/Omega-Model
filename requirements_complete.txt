@@ -1,0 +1,6 @@
+numpy>=1.26
+pandas>=2.1
+openpyxl>=3.1
+plotly>=5.18
+pypdf>=4.0
+pyinstaller>=6.0

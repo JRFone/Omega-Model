@@ -1,0 +1,3683 @@
+{
+  "scope": "Omega FISH cumulative functional demonstration for Releases 4-11",
+  "spatial_sex_seasonal": {
+    "diagnostics": {
+      "sexes": 2,
+      "areas": 3,
+      "seasons": 4,
+      "fleets": 3,
+      "movement_rows_sum_to_one": true,
+      "terminal_depletion": 0.8873889112871095,
+      "total_landed_catch": 3836.1420817182097,
+      "total_dead_discards": 171.16718925020453
+    },
+    "history": [
+      {
+        "year": 2000,
+        "total_biomass": 16882039.81251614,
+        "spawning_output": 7781015.764142737,
+        "depletion": 0.8500317702281165,
+        "landed_catch": 478.00000000000404,
+        "dead_discard_biomass": 21.532662399456736,
+        "maximum_f_scalar": 5.601757420961324e-05
+      },
+      {
+        "year": 2001,
+        "total_biomass": 16960102.92226956,
+        "spawning_output": 7784438.479370562,
+        "depletion": 0.8504056824231673,
+        "landed_catch": 483.66268974374776,
+        "dead_discard_biomass": 21.782671436408076,
+        "maximum_f_scalar": 5.647954310078994e-05
+      },
+      {
+        "year": 2002,
+        "total_biomass": 17073902.75962585,
+        "spawning_output": 7798068.078580285,
+        "depletion": 0.8518946387104853,
+        "landed_catch": 487.175287146576,
+        "dead_discard_biomass": 22.155980121635835,
+        "maximum_f_scalar": 5.6892182024042334e-05
+      },
+      {
+        "year": 2003,
+        "total_biomass": 17202013.5958691,
+        "spawning_output": 7834394.112424936,
+        "depletion": 0.8558630515489004,
+        "landed_catch": 487.66325225222084,
+        "dead_discard_biomass": 22.924417684956122,
+        "maximum_f_scalar": 5.698337608151709e-05
+      },
+      {
+        "year": 2004,
+        "total_biomass": 17325150.759232316,
+        "spawning_output": 7902261.719441599,
+        "depletion": 0.8632772020765695,
+        "landed_catch": 484.8626264601376,
+        "dead_discard_biomass": 19.680001492668797,
+        "maximum_f_scalar": 5.129059935750791e-05
+      },
+      {
+        "year": 2005,
+        "total_biomass": 17429852.084827114,
+        "spawning_output": 7989629.832144415,
+        "depletion": 0.8728216720729551,
+        "landed_catch": 479.20056488793466,
+        "dead_discard_biomass": 21.742699997666495,
+        "maximum_f_scalar": 5.049743500078587e-05
+      },
+      {
+        "year": 2006,
+        "total_biomass": 17508706.825323652,
+        "spawning_output": 8068947.94942198,
+        "depletion": 0.8814867257991429,
+        "landed_catch": 471.7192150955276,
+        "dead_discard_biomass": 22.107725855475948,
+        "maximum_f_scalar": 4.904880299551025e-05
+      },
+      {
+        "year": 2007,
+        "total_biomass": 17559192.46192379,
+        "spawning_output": 8122975.3398481505,
+        "depletion": 0.8873889112871095,
+        "landed_catch": 463.85844613206143,
+        "dead_discard_biomass": 19.24103026193652,
+        "maximum_f_scalar": 4.7145287529802224e-05
+      }
+    ],
+    "fleet_history": [
+      {
+        "year": 2000,
+        "season": 1,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 62.5,
+        "predicted_landed_catch": 62.50000000000004,
+        "dead_discard_biomass": 3.4692657974117154,
+        "f_scalar": 5.1826599618244856e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2000,
+        "season": 1,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.0,
+        "predicted_landed_catch": 14.000000000000306,
+        "dead_discard_biomass": 0.5535118410830833,
+        "f_scalar": 1.4477174657944944e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2000,
+        "season": 1,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 31.6,
+        "predicted_landed_catch": 31.600000000000406,
+        "dead_discard_biomass": 0.9870813181577534,
+        "f_scalar": 3.270796670769814e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2000,
+        "season": 2,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 62.5,
+        "predicted_landed_catch": 62.50000000000051,
+        "dead_discard_biomass": 3.4639992887941857,
+        "f_scalar": 5.3162492549033505e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2000,
+        "season": 2,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 21.0,
+        "predicted_landed_catch": 21.000000000000373,
+        "dead_discard_biomass": 0.8280688684673415,
+        "f_scalar": 1.4799624833360201e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2000,
+        "season": 2,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 47.4,
+        "predicted_landed_catch": 47.40000000000027,
+        "dead_discard_biomass": 1.478414144746313,
+        "f_scalar": 3.355365882847525e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2000,
+        "season": 3,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 62.5,
+        "predicted_landed_catch": 62.50000000000046,
+        "dead_discard_biomass": 3.4597248109825656,
+        "f_scalar": 5.4559547763225e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2000,
+        "season": 3,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 21.0,
+        "predicted_landed_catch": 21.00000000000042,
+        "dead_discard_biomass": 0.8262950305757385,
+        "f_scalar": 1.5142536473910107e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2000,
+        "season": 3,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 47.4,
+        "predicted_landed_catch": 47.40000000000053,
+        "dead_discard_biomass": 1.4766249594148129,
+        "f_scalar": 3.443789980197426e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2000,
+        "season": 4,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 62.5,
+        "predicted_landed_catch": 62.500000000000234,
+        "dead_discard_biomass": 3.4562950030271473,
+        "f_scalar": 5.601757420961324e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2000,
+        "season": 4,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.0,
+        "predicted_landed_catch": 14.000000000000332,
+        "dead_discard_biomass": 0.5499200240339972,
+        "f_scalar": 1.5505358814152295e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2000,
+        "season": 4,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 31.6,
+        "predicted_landed_catch": 31.60000000000011,
+        "dead_discard_biomass": 0.9834613127620804,
+        "f_scalar": 3.536057525572577e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2001,
+        "season": 1,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 63.69856384651051,
+        "predicted_landed_catch": 63.69856384651058,
+        "dead_discard_biomass": 3.5238370906143643,
+        "f_scalar": 5.2029282604284036e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2001,
+        "season": 1,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.261755757436923,
+        "predicted_landed_catch": 14.261755757437083,
+        "dead_discard_biomass": 0.5599851179361485,
+        "f_scalar": 1.4364303907797582e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2001,
+        "season": 1,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 31.51193111410358,
+        "predicted_landed_catch": 31.511931114103604,
+        "dead_discard_biomass": 0.9810938159438141,
+        "f_scalar": 3.213701696879205e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2001,
+        "season": 2,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 63.69856384651051,
+        "predicted_landed_catch": 63.69856384651094,
+        "dead_discard_biomass": 3.521707373630537,
+        "f_scalar": 5.345640003335964e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2001,
+        "season": 2,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 21.39263363615538,
+        "predicted_landed_catch": 21.392633636155963,
+        "dead_discard_biomass": 0.839111195312232,
+        "f_scalar": 1.4726411026113814e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2001,
+        "season": 2,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 47.26789667115536,
+        "predicted_landed_catch": 47.26789667115593,
+        "dead_discard_biomass": 1.4707764370835967,
+        "f_scalar": 3.302050909105613e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2001,
+        "season": 3,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 63.69856384651051,
+        "predicted_landed_catch": 63.69856384651067,
+        "dead_discard_biomass": 3.520116697643101,
+        "f_scalar": 5.493965430102563e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2001,
+        "season": 3,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 21.39263363615538,
+        "predicted_landed_catch": 21.39263363615558,
+        "dead_discard_biomass": 0.8384678827340469,
+        "f_scalar": 1.5105842701564846e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2001,
+        "season": 3,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 47.26789667115536,
+        "predicted_landed_catch": 47.267896671155704,
+        "dead_discard_biomass": 1.4701340746015226,
+        "f_scalar": 3.393864747270334e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2001,
+        "season": 4,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 63.69856384651051,
+        "predicted_landed_catch": 63.69856384651076,
+        "dead_discard_biomass": 3.518981091610553,
+        "f_scalar": 5.647954310078994e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2001,
+        "season": 4,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.261755757436923,
+        "predicted_landed_catch": 14.261755757437037,
+        "dead_discard_biomass": 0.5586747940585356,
+        "f_scalar": 1.5502491737770865e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2001,
+        "season": 4,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 31.51193111410358,
+        "predicted_landed_catch": 31.51193111410389,
+        "dead_discard_biomass": 0.9797858652396289,
+        "f_scalar": 3.489174117113228e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2002,
+        "season": 1,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.60367746201975,
+        "predicted_landed_catch": 64.60367746201995,
+        "dead_discard_biomass": 3.5990565013426297,
+        "f_scalar": 5.226997551079559e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2002,
+        "season": 1,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.49469584245579,
+        "predicted_landed_catch": 14.494695842456057,
+        "dead_discard_biomass": 0.5722963072380014,
+        "f_scalar": 1.4360689505730443e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2002,
+        "season": 1,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 31.25741961724312,
+        "predicted_landed_catch": 31.257419617243123,
+        "dead_discard_biomass": 0.9800813076455549,
+        "f_scalar": 3.1582807369714104e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2002,
+        "season": 2,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.60367746201975,
+        "predicted_landed_catch": 64.60367746201995,
+        "dead_discard_biomass": 3.5986578576809807,
+        "f_scalar": 5.375699676622757e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2002,
+        "season": 2,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 21.742043763683682,
+        "predicted_landed_catch": 21.742043763683935,
+        "dead_discard_biomass": 0.8582927260198738,
+        "f_scalar": 1.4748318850153503e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2002,
+        "season": 2,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 46.886129425864674,
+        "predicted_landed_catch": 46.88612942586525,
+        "dead_discard_biomass": 1.4699745571226401,
+        "f_scalar": 3.248287699954451e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2002,
+        "season": 3,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.60367746201975,
+        "predicted_landed_catch": 64.60367746201986,
+        "dead_discard_biomass": 3.59854448622245,
+        "f_scalar": 5.529744478769902e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2002,
+        "season": 3,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 21.742043763683682,
+        "predicted_landed_catch": 21.74204376368375,
+        "dead_discard_biomass": 0.8582564209478368,
+        "f_scalar": 1.5151687955283159e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2002,
+        "season": 3,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 46.886129425864674,
+        "predicted_landed_catch": 46.886129425864794,
+        "dead_discard_biomass": 1.4699413806380752,
+        "f_scalar": 3.341521078972917e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2002,
+        "season": 4,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.60367746201975,
+        "predicted_landed_catch": 64.6036774620201,
+        "dead_discard_biomass": 3.598666784425087,
+        "f_scalar": 5.6892182024042334e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2002,
+        "season": 4,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.49469584245579,
+        "predicted_landed_catch": 14.494695842456055,
+        "dead_discard_biomass": 0.572210260753939,
+        "f_scalar": 1.557090085501419e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2002,
+        "season": 4,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 31.25741961724312,
+        "predicted_landed_catch": 31.257419617243137,
+        "dead_discard_biomass": 0.9800015315987648,
+        "f_scalar": 3.438032938492914e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2003,
+        "season": 1,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.99373746651014,
+        "predicted_landed_catch": 64.99373746651062,
+        "dead_discard_biomass": 3.734911236080277,
+        "f_scalar": 5.226577259420011e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2003,
+        "season": 1,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.673176787846316,
+        "predicted_landed_catch": 14.673176787846671,
+        "dead_discard_biomass": 0.5972779274637716,
+        "f_scalar": 1.438535883202443e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2003,
+        "season": 1,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 30.864483689389022,
+        "predicted_landed_catch": 30.864483689389054,
+        "dead_discard_biomass": 0.9983118798074069,
+        "f_scalar": 3.100110944913694e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2003,
+        "season": 2,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.99373746651014,
+        "predicted_landed_catch": 64.99373746651067,
+        "dead_discard_biomass": 3.7354961893197376,
+        "f_scalar": 5.378626925533212e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2003,
+        "season": 2,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 22.009765181769474,
+        "predicted_landed_catch": 22.009765181769964,
+        "dead_discard_biomass": 0.8961672742386108,
+        "f_scalar": 1.4789677436991347e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2003,
+        "season": 2,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 46.29672553408353,
+        "predicted_landed_catch": 46.29672553408382,
+        "dead_discard_biomass": 1.4977111245365633,
+        "f_scalar": 3.1904241658565254e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2003,
+        "season": 3,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.99373746651014,
+        "predicted_landed_catch": 64.9937374665104,
+        "dead_discard_biomass": 3.73622154866649,
+        "f_scalar": 5.535844892993547e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2003,
+        "season": 3,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 22.009765181769474,
+        "predicted_landed_catch": 22.00976518176975,
+        "dead_discard_biomass": 0.8964732830458462,
+        "f_scalar": 1.5208870715861886e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2003,
+        "season": 3,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 46.29672553408353,
+        "predicted_landed_catch": 46.29672553408372,
+        "dead_discard_biomass": 1.4980089566645949,
+        "f_scalar": 3.283801640660035e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2003,
+        "season": 4,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.99373746651014,
+        "predicted_landed_catch": 64.99373746651064,
+        "dead_discard_biomass": 3.737056855389473,
+        "f_scalar": 5.698337608151709e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2003,
+        "season": 4,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.673176787846316,
+        "predicted_landed_catch": 14.67317678784645,
+        "dead_discard_biomass": 0.5978819595269237,
+        "f_scalar": 1.5643153767887826e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2003,
+        "season": 4,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 30.864483689389022,
+        "predicted_landed_catch": 30.86448368938909,
+        "dead_discard_biomass": 0.9988994502164281,
+        "f_scalar": 3.3803063569226056e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2004,
+        "season": 1,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.7732435670642,
+        "predicted_landed_catch": 64.77324356706471,
+        "dead_discard_biomass": 3.209926975729162,
+        "f_scalar": 4.699344313710595e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2004,
+        "season": 1,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.77755032109065,
+        "predicted_landed_catch": 14.777550321091086,
+        "dead_discard_biomass": 0.5187188368170128,
+        "f_scalar": 1.3033077469607954e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2004,
+        "season": 1,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 30.376380117284782,
+        "predicted_landed_catch": 30.37638011728515,
+        "dead_discard_biomass": 0.8473232697301125,
+        "f_scalar": 2.7529895234647793e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2004,
+        "season": 2,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.7732435670642,
+        "predicted_landed_catch": 64.77324356706428,
+        "dead_discard_biomass": 3.210901642856477,
+        "f_scalar": 4.8379952299790543e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2004,
+        "season": 2,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 22.166325481635972,
+        "predicted_landed_catch": 22.16632548163636,
+        "dead_discard_biomass": 0.7784885516935791,
+        "f_scalar": 1.3408657510141728e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2004,
+        "season": 2,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 45.56457017592717,
+        "predicted_landed_catch": 45.56457017592733,
+        "dead_discard_biomass": 1.2713738354876534,
+        "f_scalar": 2.834307060853563e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2004,
+        "season": 3,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.7732435670642,
+        "predicted_landed_catch": 64.77324356706471,
+        "dead_discard_biomass": 3.2119185267342907,
+        "f_scalar": 4.98119831431618e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2004,
+        "season": 3,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 22.166325481635972,
+        "predicted_landed_catch": 22.166325481636335,
+        "dead_discard_biomass": 0.7789146224438236,
+        "f_scalar": 1.379723721251034e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2004,
+        "season": 3,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 45.56457017592717,
+        "predicted_landed_catch": 45.564570175927585,
+        "dead_discard_biomass": 1.2717783019585285,
+        "f_scalar": 2.9182903981473003e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2004,
+        "season": 4,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 64.7732435670642,
+        "predicted_landed_catch": 64.77324356706421,
+        "dead_discard_biomass": 3.212961866650078,
+        "f_scalar": 5.129059935750791e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2004,
+        "season": 4,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.77755032109065,
+        "predicted_landed_catch": 14.777550321090743,
+        "dead_discard_biomass": 0.5195670012846096,
+        "f_scalar": 1.419906777483295e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2004,
+        "season": 4,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 30.376380117284782,
+        "predicted_landed_catch": 30.376380117285134,
+        "dead_discard_biomass": 0.8481280612834678,
+        "f_scalar": 3.0050016655630216e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2005,
+        "season": 1,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 63.99618036025989,
+        "predicted_landed_catch": 63.99618036025989,
+        "dead_discard_biomass": 3.5437856360733457,
+        "f_scalar": 4.623392033493729e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2005,
+        "season": 1,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.796326366201413,
+        "predicted_landed_catch": 14.796326366201571,
+        "dead_discard_biomass": 0.5803832579264251,
+        "f_scalar": 1.2969882950197159e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2005,
+        "season": 1,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 29.846842323177,
+        "predicted_landed_catch": 29.846842323177142,
+        "dead_discard_biomass": 0.9303335280022149,
+        "f_scalar": 2.693859870493958e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2005,
+        "season": 2,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 63.99618036025989,
+        "predicted_landed_catch": 63.99618036026011,
+        "dead_discard_biomass": 3.5451787955913128,
+        "f_scalar": 4.761051729332147e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2005,
+        "season": 2,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 22.19448954930212,
+        "predicted_landed_catch": 22.194489549302574,
+        "dead_discard_biomass": 0.8711648219723789,
+        "f_scalar": 1.3349664460844159e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2005,
+        "season": 2,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 44.77026348476549,
+        "predicted_landed_catch": 44.770263484766176,
+        "dead_discard_biomass": 1.3960481783611998,
+        "f_scalar": 2.7741443182906136e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2005,
+        "season": 3,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 63.99618036025989,
+        "predicted_landed_catch": 63.99618036026013,
+        "dead_discard_biomass": 3.5465639939154667,
+        "f_scalar": 4.903131864612354e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2005,
+        "season": 3,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 22.19448954930212,
+        "predicted_landed_catch": 22.194489549302183,
+        "dead_discard_biomass": 0.8717497101757193,
+        "f_scalar": 1.3742092385424579e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2005,
+        "season": 3,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 44.77026348476549,
+        "predicted_landed_catch": 44.77026348476579,
+        "dead_discard_biomass": 1.3965919239644273,
+        "f_scalar": 2.8570035029772817e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2005,
+        "season": 4,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 63.99618036025989,
+        "predicted_landed_catch": 63.99618036026013,
+        "dead_discard_biomass": 3.547931139189453,
+        "f_scalar": 5.049743500078587e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2005,
+        "season": 4,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.796326366201413,
+        "predicted_landed_catch": 14.79632636620171,
+        "dead_discard_biomass": 0.5815506365079641,
+        "f_scalar": 1.4147449786274142e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2005,
+        "season": 4,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 29.846842323177,
+        "predicted_landed_catch": 29.846842323177256,
+        "dead_discard_biomass": 0.9314183759865928,
+        "f_scalar": 2.9425019296230436e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2006,
+        "season": 1,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 62.852800020149665,
+        "predicted_landed_catch": 62.85280002015018,
+        "dead_discard_biomass": 3.5958932516858844,
+        "f_scalar": 4.488677362479102e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2006,
+        "season": 1,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.727437941460545,
+        "predicted_landed_catch": 14.727437941460867,
+        "dead_discard_biomass": 0.5969112475097181,
+        "f_scalar": 1.274548194056535e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2006,
+        "season": 1,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 29.334165061524573,
+        "predicted_landed_catch": 29.334165061524647,
+        "dead_discard_biomass": 0.9446979992772969,
+        "f_scalar": 2.6174029176526548e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2006,
+        "season": 2,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 62.852800020149665,
+        "predicted_landed_catch": 62.85280002015024,
+        "dead_discard_biomass": 3.5975200419476323,
+        "f_scalar": 4.62311928949603e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2006,
+        "season": 2,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 22.091156912190815,
+        "predicted_landed_catch": 22.09115691219142,
+        "dead_discard_biomass": 0.8960629761757759,
+        "f_scalar": 1.312255695152826e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2006,
+        "season": 2,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 44.00124759228686,
+        "predicted_landed_catch": 44.001247592287136,
+        "dead_discard_biomass": 1.4176836455878967,
+        "f_scalar": 2.6958602146571857e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2006,
+        "season": 3,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 62.852800020149665,
+        "predicted_landed_catch": 62.85280002014976,
+        "dead_discard_biomass": 3.599099712371186,
+        "f_scalar": 4.7618163165322105e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2006,
+        "season": 3,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 22.091156912190815,
+        "predicted_landed_catch": 22.091156912190947,
+        "dead_discard_biomass": 0.8967375804727403,
+        "f_scalar": 1.3511878015478804e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2006,
+        "season": 3,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 44.00124759228686,
+        "predicted_landed_catch": 44.00124759228692,
+        "dead_discard_biomass": 1.418301004664133,
+        "f_scalar": 2.776797921493152e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2006,
+        "season": 4,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 62.852800020149665,
+        "predicted_landed_catch": 62.852800020149786,
+        "dead_discard_biomass": 3.600627459300997,
+        "f_scalar": 4.904880299551025e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2006,
+        "season": 4,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.727437941460545,
+        "predicted_landed_catch": 14.727437941460881,
+        "dead_discard_biomass": 0.5982594830188667,
+        "f_scalar": 1.3913743627601283e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2006,
+        "season": 4,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 29.334165061524573,
+        "predicted_landed_catch": 29.334165061524818,
+        "dead_discard_biomass": 0.9459314534638212,
+        "f_scalar": 2.8602810523099126e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2007,
+        "season": 1,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 61.62304193077595,
+        "predicted_landed_catch": 61.62304193077654,
+        "dead_discard_biomass": 3.1222166845414496,
+        "f_scalar": 4.313174128103706e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2007,
+        "season": 1,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.57846870539066,
+        "predicted_landed_catch": 14.578468705390923,
+        "dead_discard_biomass": 0.5231299940552566,
+        "f_scalar": 1.2355128399122416e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2007,
+        "season": 1,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 28.894786976400198,
+        "predicted_landed_catch": 28.894786976400212,
+        "dead_discard_biomass": 0.8241211827218783,
+        "f_scalar": 2.5269794762817262e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2007,
+        "season": 2,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 61.62304193077595,
+        "predicted_landed_catch": 61.62304193077595,
+        "dead_discard_biomass": 3.12383310989291,
+        "f_scalar": 4.442856390135877e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2007,
+        "season": 2,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 21.86770305808599,
+        "predicted_landed_catch": 21.867703058086246,
+        "dead_discard_biomass": 0.7853925058350204,
+        "f_scalar": 1.272309619009199e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2007,
+        "season": 2,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 43.34218046460029,
+        "predicted_landed_catch": 43.34218046460067,
+        "dead_discard_biomass": 1.236814836830834,
+        "f_scalar": 2.60300915722652e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2007,
+        "season": 3,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 61.62304193077595,
+        "predicted_landed_catch": 61.62304193077627,
+        "dead_discard_biomass": 3.1253818370570405,
+        "f_scalar": 4.576604585071822e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2007,
+        "season": 3,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 21.86770305808599,
+        "predicted_landed_catch": 21.867703058086533,
+        "dead_discard_biomass": 0.7860598434517178,
+        "f_scalar": 1.3102822128060587e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2007,
+        "season": 3,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 43.34218046460029,
+        "predicted_landed_catch": 43.34218046460083,
+        "dead_discard_biomass": 1.2374206983739364,
+        "f_scalar": 2.6814202444310885e-05,
+        "effective_discard_mortality": 0.3925
+      },
+      {
+        "year": 2007,
+        "season": 4,
+        "fleet": "commercial",
+        "sector": "commercial",
+        "target_landed_catch": 61.62304193077595,
+        "predicted_landed_catch": 61.623041930776125,
+        "dead_discard_biomass": 3.126862113573552,
+        "f_scalar": 4.7145287529802224e-05,
+        "effective_discard_mortality": 0.6975
+      },
+      {
+        "year": 2007,
+        "season": 4,
+        "fleet": "charter",
+        "sector": "charter",
+        "target_landed_catch": 14.57846870539066,
+        "predicted_landed_catch": 14.578468705390712,
+        "dead_discard_biomass": 0.5244647553698639,
+        "f_scalar": 1.3494608193648835e-05,
+        "effective_discard_mortality": 0.49750000000000005
+      },
+      {
+        "year": 2007,
+        "season": 4,
+        "fleet": "recreational",
+        "sector": "recreational",
+        "target_landed_catch": 28.894786976400198,
+        "predicted_landed_catch": 28.894786976400397,
+        "dead_discard_biomass": 0.8253327002330579,
+        "f_scalar": 2.7622770010524243e-05,
+        "effective_discard_mortality": 0.3925
+      }
+    ]
+  },
+  "cpue_standardization": {
+    "annual_index": [
+      {
+        "year": 2000,
+        "standardized_index": 0.976280401143998,
+        "log_index": 0.0,
+        "se_log": 0.07059812253523517,
+        "lower_95": 0.8501200044597053,
+        "upper_95": 1.1211633847666533,
+        "raw_mean_cpue": 1548.3876070050537,
+        "records": 12
+      },
+      {
+        "year": 2001,
+        "standardized_index": 1.0004791702756741,
+        "log_index": 0.02448449308687195,
+        "se_log": 0.06756378002914533,
+        "lower_95": 0.8763883596570972,
+        "upper_95": 1.142140421110961,
+        "raw_mean_cpue": 1578.5565709473838,
+        "records": 12
+      },
+      {
+        "year": 2002,
+        "standardized_index": 0.9593521764957631,
+        "log_index": -0.017491600884789626,
+        "se_log": 0.07034039863755549,
+        "lower_95": 0.8358014285316159,
+        "upper_95": 1.101166577525589,
+        "raw_mean_cpue": 1503.0520376153552,
+        "records": 12
+      },
+      {
+        "year": 2003,
+        "standardized_index": 0.9833894924218768,
+        "log_index": 0.007255428566967481,
+        "se_log": 0.07416802830383648,
+        "lower_95": 0.8503397151287341,
+        "upper_95": 1.1372571180676334,
+        "raw_mean_cpue": 1555.432018942336,
+        "records": 12
+      },
+      {
+        "year": 2004,
+        "standardized_index": 1.027319345506852,
+        "log_index": 0.05095827004876252,
+        "se_log": 0.070837379434503,
+        "lower_95": 0.894144010492456,
+        "upper_95": 1.1803300422169871,
+        "raw_mean_cpue": 1601.7939496510871,
+        "records": 12
+      },
+      {
+        "year": 2005,
+        "standardized_index": 1.0387963933836426,
+        "log_index": 0.06206816647065416,
+        "se_log": 0.07034660099649458,
+        "lower_95": 0.9050033722382076,
+        "upper_95": 1.1923689789553977,
+        "raw_mean_cpue": 1645.7225799903279,
+        "records": 12
+      },
+      {
+        "year": 2006,
+        "standardized_index": 0.953979628696321,
+        "log_index": -0.023107523753024495,
+        "se_log": 0.07164936943587658,
+        "lower_95": 0.8289912113391587,
+        "upper_95": 1.0978127626919287,
+        "raw_mean_cpue": 1519.2814881994782,
+        "records": 12
+      },
+      {
+        "year": 2007,
+        "standardized_index": 1.060403392075871,
+        "log_index": 0.08265483186868927,
+        "se_log": 0.06898255315879219,
+        "lower_95": 0.9263006602881779,
+        "upper_95": 1.2139204927007055,
+        "raw_mean_cpue": 1648.2719653913139,
+        "records": 12
+      }
+    ],
+    "coefficients": [
+      {
+        "term": "intercept",
+        "estimate": 7.2031475473626445,
+        "se": 0.07059812253523517,
+        "z": 102.03029894693856
+      },
+      {
+        "term": "year=2001",
+        "estimate": 0.0244844930868717,
+        "se": 0.06266181084333097,
+        "z": 0.3907402731799213
+      },
+      {
+        "term": "year=2002",
+        "estimate": -0.01749160088478983,
+        "se": 0.06443612605952982,
+        "z": -0.27145643219814425
+      },
+      {
+        "term": "year=2003",
+        "estimate": 0.007255428566967316,
+        "se": 0.06154464594502287,
+        "z": 0.11788886678214881
+      },
+      {
+        "term": "year=2004",
+        "estimate": 0.05095827004876282,
+        "se": 0.06354541732424383,
+        "z": 0.8019188825017164
+      },
+      {
+        "term": "year=2005",
+        "estimate": 0.0620681664706543,
+        "se": 0.062256695019762096,
+        "z": 0.9969717546193554
+      },
+      {
+        "term": "year=2006",
+        "estimate": -0.023107523753024672,
+        "se": 0.061970815806100865,
+        "z": -0.3728775142371096
+      },
+      {
+        "term": "year=2007",
+        "estimate": 0.08265483186868895,
+        "se": 0.06258587209350791,
+        "z": 1.320662780654339
+      },
+      {
+        "term": "vessel=V2",
+        "estimate": 0.14755017939633533,
+        "se": 0.04490537280743246,
+        "z": 3.285802347729618
+      },
+      {
+        "term": "vessel=V3",
+        "estimate": 0.1895838778103726,
+        "se": 0.04726296805689295,
+        "z": 4.0112562880553835
+      },
+      {
+        "term": "vessel=V4",
+        "estimate": 0.25283962674511906,
+        "se": 0.04510346490389319,
+        "z": 5.6057694743379844
+      },
+      {
+        "term": "area=North",
+        "estimate": -0.0919889628326043,
+        "se": 0.04165651722434027,
+        "z": -2.2082730137327546
+      },
+      {
+        "term": "area=South",
+        "estimate": 0.02961066698874396,
+        "se": 0.040042034565955405,
+        "z": 0.7394895716392889
+      },
+      {
+        "term": "month=10",
+        "estimate": -0.01324501514377033,
+        "se": 0.06812990645758689,
+        "z": -0.19440823908977165
+      },
+      {
+        "term": "month=11",
+        "estimate": -0.1480880853361548,
+        "se": 0.08092234864289836,
+        "z": -1.8300023148073918
+      },
+      {
+        "term": "month=12",
+        "estimate": 0.037692023765363084,
+        "se": 0.0721389714163181,
+        "z": 0.522491837980892
+      },
+      {
+        "term": "month=2",
+        "estimate": 0.03899396882020788,
+        "se": 0.0643700888521587,
+        "z": 0.6057777690779153
+      },
+      {
+        "term": "month=3",
+        "estimate": -0.021960813443196368,
+        "se": 0.07510064025071919,
+        "z": -0.29241845834977503
+      },
+      {
+        "term": "month=4",
+        "estimate": -0.050443952089190246,
+        "se": 0.06750841398335992,
+        "z": -0.7472246659745868
+      },
+      {
+        "term": "month=5",
+        "estimate": 0.015926665122029445,
+        "se": 0.06787473558587978,
+        "z": 0.23464791405158306
+      },
+      {
+        "term": "month=6",
+        "estimate": -0.02669255025970219,
+        "se": 0.07794660253810716,
+        "z": -0.34244661589518954
+      },
+      {
+        "term": "month=7",
+        "estimate": -0.018965752227667342,
+        "se": 0.09106840113202898,
+        "z": -0.20825832003101943
+      },
+      {
+        "term": "month=8",
+        "estimate": 0.007545785156868456,
+        "se": 0.07459020556265554,
+        "z": 0.10116321707318557
+      },
+      {
+        "term": "month=9",
+        "estimate": 0.0723361210284756,
+        "se": 0.08847552048968832,
+        "z": 0.8175834471288164
+      },
+      {
+        "term": "depth",
+        "estimate": -0.04700022607228177,
+        "se": 0.01664435336384377,
+        "z": -2.823794054647957
+      }
+    ],
+    "diagnostics": {
+      "records_used": 96,
+      "years": 8,
+      "first_year_reference": 2000,
+      "categorical_references": {
+        "vessel": "V1",
+        "area": "Central",
+        "month": "1"
+      },
+      "continuous_scaling": {
+        "depth": {
+          "mean": 69.40232774354881,
+          "sd": 25.38203517349061
+        }
+      },
+      "rmse_log": 0.12480339176002758,
+      "mean_residual": -1.7208456881689926e-15,
+      "lag1_residual_correlation": -0.1809885147638488,
+      "condition_number": 218.72232480571114,
+      "ridge": 1e-06,
+      "formula": "log(catch/effort) ~ year + categorical effects + standardized continuous covariates",
+      "privacy_note": "Outputs contain coefficients and annual indices only; vessel/skipper identifiers should remain in protected source data."
+    },
+    "catchability": {
+      "cpue_biomass_elasticity": 1.1998200395620378,
+      "classification": "proportional",
+      "annual_log_catchability_trend": 0.001422732198532248,
+      "catchability_change_per_year": 0.0014237447621319177,
+      "pairs": 8
+    }
+  },
+  "observation_models": {
+    "total_objective": 43.520009091229255,
+    "components": [
+      {
+        "component": "CPUE",
+        "raw_nll": -5.497188625744414,
+        "weight": 1.0,
+        "weighted_nll": -5.497188625744414,
+        "points": 8,
+        "cv": 0.2,
+        "log_sd": 0.19804220043536505
+      },
+      {
+        "component": "Age composition",
+        "raw_nll": 49.01719771697367,
+        "weight": 1.0,
+        "weighted_nll": 49.01719771697367,
+        "points": 21,
+        "sample_size": 301.0,
+        "concentration": 100.0,
+        "approx_effective_sample_size": 75.81296758104739
+      }
+    ]
+  },
+  "inference": {
+    "parameters": {
+      "scale": 0.9772301636352095,
+      "trend": 0.006517306598116612
+    },
+    "objective": -8.491551602367505,
+    "standard_errors": {
+      "scale": 0.19252831441469573,
+      "trend": 0.28710374678790807
+    },
+    "diagnostics": {
+      "converged": true,
+      "maximum_gradient": 0.000788954501729222,
+      "hessian_positive_definite": true,
+      "hessian_min_eigenvalue": 9.064550650803742,
+      "hessian_max_eigenvalue": 108.9817443992745,
+      "hessian_condition_number": 12.022851280511201,
+      "near_boundary": [],
+      "starts": 4,
+      "objective_spread": 5.333472330448785e-09,
+      "parameter_specs": [
+        {
+          "name": "scale",
+          "initial": 1.0,
+          "lower": 0.1,
+          "upper": 3.0,
+          "transform": "bounded",
+          "estimated": true,
+          "phase": 1,
+          "prior_mean": 1.0,
+          "prior_sd": 0.5
+        },
+        {
+          "name": "trend",
+          "initial": 0.0,
+          "lower": -0.2,
+          "upper": 0.2,
+          "transform": "bounded",
+          "estimated": true,
+          "phase": 1,
+          "prior_mean": 0.0,
+          "prior_sd": 0.1
+        }
+      ]
+    },
+    "profile": [
+      {
+        "parameter": "trend",
+        "value": -0.08,
+        "objective": -3.8826869724749553,
+        "maximum_gradient": 0.0014036051654287005,
+        "converged": false,
+        "fitted_parameters": {
+          "scale": 1.3116907957313915,
+          "trend": -0.08
+        },
+        "objective_delta": 4.583023512543319
+      },
+      {
+        "parameter": "trend",
+        "value": -0.06,
+        "objective": -5.776282951701239,
+        "maximum_gradient": 0.0015181227386307226,
+        "converged": false,
+        "fitted_parameters": {
+          "scale": 1.2261702151492415,
+          "trend": -0.06
+        },
+        "objective_delta": 2.689427533317035
+      },
+      {
+        "parameter": "trend",
+        "value": -0.04,
+        "objective": -7.167740259959327,
+        "maximum_gradient": 0.00016165477845220266,
+        "converged": true,
+        "fitted_parameters": {
+          "scale": 1.145763054788722,
+          "trend": -0.04
+        },
+        "objective_delta": 1.2979702250589469
+      },
+      {
+        "parameter": "trend",
+        "value": -0.020000000000000004,
+        "objective": -8.062606623515947,
+        "maximum_gradient": 0.00032480791389843944,
+        "converged": true,
+        "fitted_parameters": {
+          "scale": 1.0702325325916064,
+          "trend": -0.020000000000000004
+        },
+        "objective_delta": 0.403103861502327
+      },
+      {
+        "parameter": "trend",
+        "value": 0.0,
+        "objective": -8.465710485018274,
+        "maximum_gradient": 0.0004661046659748535,
+        "converged": true,
+        "fitted_parameters": {
+          "scale": 0.9993636744489403,
+          "trend": 0.0
+        },
+        "objective_delta": 0.0
+      },
+      {
+        "parameter": "trend",
+        "value": 0.020000000000000004,
+        "objective": -8.381234454774319,
+        "maximum_gradient": 0.0005138046432762167,
+        "converged": true,
+        "fitted_parameters": {
+          "scale": 0.9329331576977311,
+          "trend": 0.020000000000000004
+        },
+        "objective_delta": 0.08447603024395534
+      },
+      {
+        "parameter": "trend",
+        "value": 0.039999999999999994,
+        "objective": -7.812785124940646,
+        "maximum_gradient": 0.00021797545212405526,
+        "converged": true,
+        "fitted_parameters": {
+          "scale": 0.8707096583712406,
+          "trend": 0.039999999999999994
+        },
+        "objective_delta": 0.6529253600776279
+      },
+      {
+        "parameter": "trend",
+        "value": 0.06000000000000001,
+        "objective": -6.763458314913328,
+        "maximum_gradient": 0.002112871135310385,
+        "converged": false,
+        "fitted_parameters": {
+          "scale": 0.8124918428737613,
+          "trend": 0.06000000000000001
+        },
+        "objective_delta": 1.7022521701049458
+      },
+      {
+        "parameter": "trend",
+        "value": 0.08,
+        "objective": -5.235899481690046,
+        "maximum_gradient": 0.0005499570708490186,
+        "converged": true,
+        "fitted_parameters": {
+          "scale": 0.758009359129385,
+          "trend": 0.08
+        },
+        "objective_delta": 3.229811003328228
+      }
+    ],
+    "mcmc_summary": {
+      "scale": {
+        "mean": 0.9883083573313859,
+        "sd": 0.1255913235866417,
+        "lower_95": 0.7716321137514183,
+        "median": 0.9921322583631718,
+        "upper_95": 1.2627908928055676
+      },
+      "trend": {
+        "mean": 0.0048707999694039324,
+        "sd": 0.029035389596584773,
+        "lower_95": -0.044128700575878636,
+        "median": 0.005378948206998441,
+        "upper_95": 0.06898591748282032
+      }
+    },
+    "mcmc_acceptance_rate": 0.6216666666666667
+  },
+  "tagging": {
+    "predictions": [
+      {
+        "release_id": 0,
+        "release_year": 2000,
+        "recapture_year": 2001,
+        "fleet": 0,
+        "area": 1,
+        "available_tags": 721.1872134465559,
+        "predicted_recaptures": 28.84748853786224,
+        "observed_recaptures": 25,
+        "reporting_rate": 0.8,
+        "capture_rate": 0.05
+      },
+      {
+        "release_id": 0,
+        "release_year": 2000,
+        "recapture_year": 2002,
+        "fleet": 0,
+        "area": 2,
+        "available_tags": 60.52132974314811,
+        "predicted_recaptures": 2.420853189725925,
+        "observed_recaptures": 8,
+        "reporting_rate": 0.8,
+        "capture_rate": 0.05
+      }
+    ],
+    "diagnostics": {
+      "releases": 1,
+      "observations": 2,
+      "objective": 8.903770194253054,
+      "mean_residual": 0.8658291362059174,
+      "rmse": 4.792183593080127,
+      "settings": {
+        "natural_mortality": 0.12,
+        "tag_loss": 0.03,
+        "tag_induced_mortality": 0.02,
+        "initial_mixing_survival": 0.95,
+        "reporting_rates": [
+          0.8
+        ],
+        "fleet_capture_rates": [
+          0.05
+        ],
+        "overdispersion": 50.0
+      }
+    }
+  },
+  "data_conflict": {
+    "series": [
+      "biomass",
+      "cpue",
+      "catch"
+    ],
+    "pairs": [
+      {
+        "series_a": "biomass",
+        "series_b": "cpue",
+        "overlap": 8,
+        "log_correlation": 0.45947668616113524,
+        "log_slope": 1.1998200395617236,
+        "conflict": "low"
+      },
+      {
+        "series_a": "biomass",
+        "series_b": "catch",
+        "overlap": 8,
+        "log_correlation": -0.6013635852740126,
+        "log_slope": -0.7075092023812596,
+        "conflict": "high"
+      },
+      {
+        "series_a": "cpue",
+        "series_b": "catch",
+        "overlap": 8,
+        "log_correlation": -0.3754957166634692,
+        "log_slope": -0.16917933857220355,
+        "conflict": "high"
+      }
+    ],
+    "correlation_matrix": [
+      [
+        1.0,
+        0.45947668616113524,
+        -0.6013635852740126
+      ],
+      [
+        0.45947668616113524,
+        1.0,
+        -0.3754957166634692
+      ],
+      [
+        -0.6013635852740126,
+        -0.3754957166634692,
+        1.0
+      ]
+    ],
+    "conflict_score_0_100": 32.561976731249395,
+    "mean_absolute_correlation": 0.478778662699539
+  },
+  "reliability": {
+    "grade": "B",
+    "label": "usable with stated cautions",
+    "failures": 0,
+    "warnings": 1,
+    "tested": 8,
+    "items": [
+      {
+        "diagnostic": "Maximum gradient",
+        "status": "PASS",
+        "value": 0.000788954501729222,
+        "threshold": "\u22640.001 preferred",
+        "impact": "High",
+        "explanation": "Large gradients indicate the optimiser may not have reached a stationary solution."
+      },
+      {
+        "diagnostic": "Hessian",
+        "status": "PASS",
+        "value": true,
+        "threshold": "Positive definite",
+        "impact": "High",
+        "explanation": "A non-positive Hessian can indicate a saddle point, flat ridge or unquantified uncertainty."
+      },
+      {
+        "diagnostic": "Retrospective bias",
+        "status": "PASS",
+        "value": 0.08,
+        "threshold": "|Mohn rho| \u22640.15 preferred",
+        "impact": "High",
+        "explanation": "Persistent retrospective revisions weaken confidence in terminal stock status."
+      },
+      {
+        "diagnostic": "Predictive holdout",
+        "status": "PASS",
+        "value": 0.18,
+        "threshold": "\u226420% relative error preferred",
+        "impact": "High",
+        "explanation": "A model that cannot predict omitted observations may be fitting history without capturing process."
+      },
+      {
+        "diagnostic": "Data conflict",
+        "status": "WARN",
+        "value": 32.561976731249395,
+        "threshold": "<15 low, 15\u201335 moderate, >35 high",
+        "impact": "High",
+        "explanation": "Strongly contradictory data sources force the model to compromise or rely on weights and assumptions."
+      },
+      {
+        "diagnostic": "Parameter conditioning",
+        "status": "PASS",
+        "value": 12.022851280511201,
+        "threshold": "<100,000 preferred",
+        "impact": "Medium",
+        "explanation": "Large condition numbers indicate weakly identified parameter combinations."
+      },
+      {
+        "diagnostic": "Boundary parameters",
+        "status": "PASS",
+        "value": 0,
+        "threshold": "0 preferred",
+        "impact": "Medium",
+        "explanation": "Boundary estimates can indicate insufficient information or restrictive parameter ranges."
+      },
+      {
+        "diagnostic": "Optimizer agreement",
+        "status": "PASS",
+        "value": 0.02,
+        "threshold": "Terminal depletion spread \u22640.03",
+        "impact": "High",
+        "explanation": "Different optimisers should reach materially similar solutions."
+      }
+    ],
+    "disclaimer": "This grade summarises implemented diagnostics; it does not constitute independent peer review or legal/scientific certification."
+  },
+  "mse": {
+    "operating_model": {
+      "k": 10000,
+      "r": 0.18,
+      "initial_depletion": 0.8873889112871095,
+      "process_cv": 0.12,
+      "observation_cv": 0.2,
+      "catch_bias": 0.0,
+      "implementation_cv": 0.1,
+      "recruitment_regime_probability": 0.0,
+      "poor_regime_productivity_multiplier": 0.6
+    },
+    "settings": {
+      "years": 20,
+      "simulations": 120,
+      "seed": 45125,
+      "initial_catch": 400.0,
+      "economic_price_per_tonne": 1.0,
+      "economic_cost_per_effort": 0.0
+    },
+    "procedures": [
+      {
+        "name": "Conservative",
+        "assessment_interval": 1,
+        "target_depletion": 0.45,
+        "limit_depletion": 0.15,
+        "target_f_fraction": 0.75,
+        "maximum_catch_change": 0.15,
+        "minimum_catch": 0.0,
+        "maximum_catch": Infinity,
+        "closure_below_limit": true,
+        "pstar": 0.45
+      },
+      {
+        "name": "Balanced",
+        "assessment_interval": 1,
+        "target_depletion": 0.4,
+        "limit_depletion": 0.1,
+        "target_f_fraction": 1.0,
+        "maximum_catch_change": 0.2,
+        "minimum_catch": 0.0,
+        "maximum_catch": Infinity,
+        "closure_below_limit": true,
+        "pstar": 0.45
+      },
+      {
+        "name": "Yield focused",
+        "assessment_interval": 1,
+        "target_depletion": 0.35,
+        "limit_depletion": 0.1,
+        "target_f_fraction": 1.15,
+        "maximum_catch_change": 0.3,
+        "minimum_catch": 0.0,
+        "maximum_catch": Infinity,
+        "closure_below_limit": true,
+        "pstar": 0.45
+      }
+    ],
+    "summary": [
+      {
+        "procedure": "Conservative",
+        "prob_terminal_above_target": 0.9666666666666667,
+        "prob_terminal_above_limit": 1.0,
+        "median_terminal_depletion": 0.7594625900595697,
+        "depletion_p10": 0.5136266265009827,
+        "median_annual_catch": 303.5645462906217,
+        "catch_p10": 291.324217587332,
+        "catch_p90": 310.51788264758903,
+        "median_catch_cv": 0.10058039469337751,
+        "mean_fraction_years_below_limit": 0.0,
+        "mean_closure_frequency": 0.0,
+        "median_rebuild_year": 1.0,
+        "mean_cumulative_economic_value": 6046.814116712089
+      },
+      {
+        "procedure": "Balanced",
+        "prob_terminal_above_target": 0.8833333333333333,
+        "prob_terminal_above_limit": 1.0,
+        "median_terminal_depletion": 0.6318748358154876,
+        "depletion_p10": 0.39609260068116675,
+        "median_annual_catch": 401.0487140270321,
+        "catch_p10": 385.70329491083675,
+        "catch_p90": 413.1344593490614,
+        "median_catch_cv": 0.10064766907122336,
+        "mean_fraction_years_below_limit": 0.0,
+        "mean_closure_frequency": 0.0,
+        "median_rebuild_year": 1.0,
+        "mean_cumulative_economic_value": 7978.093340990312
+      },
+      {
+        "procedure": "Yield focused",
+        "prob_terminal_above_target": 0.8583333333333333,
+        "prob_terminal_above_limit": 1.0,
+        "median_terminal_depletion": 0.5542335285994859,
+        "depletion_p10": 0.3097131338205915,
+        "median_annual_catch": 461.1282897540764,
+        "catch_p10": 441.9753649598605,
+        "catch_p90": 475.8856962067706,
+        "median_catch_cv": 0.1010311398269862,
+        "mean_fraction_years_below_limit": 0.0,
+        "mean_closure_frequency": 0.0,
+        "median_rebuild_year": 1.0,
+        "mean_cumulative_economic_value": 9176.985384673531
+      }
+    ],
+    "pareto_front": [
+      {
+        "procedure": "Conservative",
+        "prob_terminal_above_target": 0.9666666666666667,
+        "prob_terminal_above_limit": 1.0,
+        "median_terminal_depletion": 0.7594625900595697,
+        "depletion_p10": 0.5136266265009827,
+        "median_annual_catch": 303.5645462906217,
+        "catch_p10": 291.324217587332,
+        "catch_p90": 310.51788264758903,
+        "median_catch_cv": 0.10058039469337751,
+        "mean_fraction_years_below_limit": 0.0,
+        "mean_closure_frequency": 0.0,
+        "median_rebuild_year": 1.0,
+        "mean_cumulative_economic_value": 6046.814116712089
+      },
+      {
+        "procedure": "Balanced",
+        "prob_terminal_above_target": 0.8833333333333333,
+        "prob_terminal_above_limit": 1.0,
+        "median_terminal_depletion": 0.6318748358154876,
+        "depletion_p10": 0.39609260068116675,
+        "median_annual_catch": 401.0487140270321,
+        "catch_p10": 385.70329491083675,
+        "catch_p90": 413.1344593490614,
+        "median_catch_cv": 0.10064766907122336,
+        "mean_fraction_years_below_limit": 0.0,
+        "mean_closure_frequency": 0.0,
+        "median_rebuild_year": 1.0,
+        "mean_cumulative_economic_value": 7978.093340990312
+      },
+      {
+        "procedure": "Yield focused",
+        "prob_terminal_above_target": 0.8583333333333333,
+        "prob_terminal_above_limit": 1.0,
+        "median_terminal_depletion": 0.5542335285994859,
+        "depletion_p10": 0.3097131338205915,
+        "median_annual_catch": 461.1282897540764,
+        "catch_p10": 441.9753649598605,
+        "catch_p90": 475.8856962067706,
+        "median_catch_cv": 0.1010311398269862,
+        "mean_fraction_years_below_limit": 0.0,
+        "mean_closure_frequency": 0.0,
+        "median_rebuild_year": 1.0,
+        "mean_cumulative_economic_value": 9176.985384673531
+      }
+    ],
+    "sample_trajectories": [
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 1,
+        "true_biomass": 9021.38526792834,
+        "true_depletion": 0.9021385267928341,
+        "estimated_depletion": 0.939394569943031,
+        "implemented_catch": 358.7701667739987
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 2,
+        "true_biomass": 9042.692029797017,
+        "true_depletion": 0.9042692029797017,
+        "estimated_depletion": 0.8965356759489509,
+        "implemented_catch": 268.02610104309935
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 3,
+        "true_biomass": 10738.076581308533,
+        "true_depletion": 1.0738076581308533,
+        "estimated_depletion": 0.8145493672094478,
+        "implemented_catch": 331.03406450418197
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 4,
+        "true_biomass": 8968.24793203414,
+        "true_depletion": 0.8968247932034141,
+        "estimated_depletion": 1.1232236658837444,
+        "implemented_catch": 280.1780708326203
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 5,
+        "true_biomass": 8567.76576078124,
+        "true_depletion": 0.856776576078124,
+        "estimated_depletion": 0.9005934096946036,
+        "implemented_catch": 313.68424709068967
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 6,
+        "true_biomass": 7667.108143942569,
+        "true_depletion": 0.7667108143942569,
+        "estimated_depletion": 0.9870387516872008,
+        "implemented_catch": 294.45036165925245
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 7,
+        "true_biomass": 10484.106652529723,
+        "true_depletion": 1.0484106652529723,
+        "estimated_depletion": 0.6722533737089003,
+        "implemented_catch": 313.2980081323432
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 8,
+        "true_biomass": 9959.494020088623,
+        "true_depletion": 0.9959494020088623,
+        "estimated_depletion": 1.1101369536638321,
+        "implemented_catch": 303.9414892180892
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 9,
+        "true_biomass": 9320.619269562178,
+        "true_depletion": 0.9320619269562178,
+        "estimated_depletion": 0.9586250859943162,
+        "implemented_catch": 276.5917490229197
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 10,
+        "true_biomass": 8382.882042351734,
+        "true_depletion": 0.8382882042351734,
+        "estimated_depletion": 1.1189160675469147,
+        "implemented_catch": 256.542887787802
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 11,
+        "true_biomass": 8390.777546778734,
+        "true_depletion": 0.8390777546778734,
+        "estimated_depletion": 1.2134310937328847,
+        "implemented_catch": 351.92387053012635
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 12,
+        "true_biomass": 11042.80971041471,
+        "true_depletion": 1.104280971041471,
+        "estimated_depletion": 0.6753845286681931,
+        "implemented_catch": 288.4742634737072
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 13,
+        "true_biomass": 11024.179238567898,
+        "true_depletion": 1.1024179238567897,
+        "estimated_depletion": 1.2321087107452855,
+        "implemented_catch": 353.3240714134139
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 14,
+        "true_biomass": 10310.277766188157,
+        "true_depletion": 1.0310277766188158,
+        "estimated_depletion": 1.2008412524451813,
+        "implemented_catch": 312.89725847116415
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 15,
+        "true_biomass": 13531.389169771104,
+        "true_depletion": 1.3531389169771104,
+        "estimated_depletion": 1.1555713181081682,
+        "implemented_catch": 268.4387215273338
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 16,
+        "true_biomass": 12241.411886011421,
+        "true_depletion": 1.2241411886011422,
+        "estimated_depletion": 1.2413589815631279,
+        "implemented_catch": 263.86494464614094
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 17,
+        "true_biomass": 14696.79378981914,
+        "true_depletion": 1.469679378981914,
+        "estimated_depletion": 1.273446522530918,
+        "implemented_catch": 269.9234496944025
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 18,
+        "true_biomass": 15616.709061995422,
+        "true_depletion": 1.5616709061995422,
+        "estimated_depletion": 1.4038674492907413,
+        "implemented_catch": 293.22820484885364
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 19,
+        "true_biomass": 15892.963006062504,
+        "true_depletion": 1.5892963006062504,
+        "estimated_depletion": 1.645892226860464,
+        "implemented_catch": 342.5010467338438
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 0,
+        "year": 20,
+        "true_biomass": 13394.371096982124,
+        "true_depletion": 1.3394371096982125,
+        "estimated_depletion": 1.6086701955568417,
+        "implemented_catch": 285.46590633731023
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 1,
+        "true_biomass": 10130.259906703699,
+        "true_depletion": 1.0130259906703698,
+        "estimated_depletion": 0.709617813444916,
+        "implemented_catch": 384.3038104862956
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 2,
+        "true_biomass": 10142.287219740843,
+        "true_depletion": 1.0142287219740844,
+        "estimated_depletion": 1.231178958111652,
+        "implemented_catch": 306.67955716405254
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 3,
+        "true_biomass": 10648.107613098064,
+        "true_depletion": 1.0648107613098063,
+        "estimated_depletion": 0.8466359309617887,
+        "implemented_catch": 333.33860709733585
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 4,
+        "true_biomass": 9692.591209905897,
+        "true_depletion": 0.9692591209905896,
+        "estimated_depletion": 1.0771165984383977,
+        "implemented_catch": 315.5714697514834
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 5,
+        "true_biomass": 8549.154193782575,
+        "true_depletion": 0.8549154193782575,
+        "estimated_depletion": 1.2295446416359468,
+        "implemented_catch": 299.8786229718344
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 6,
+        "true_biomass": 8939.12671862517,
+        "true_depletion": 0.893912671862517,
+        "estimated_depletion": 0.8248102206477373,
+        "implemented_catch": 302.358098512364
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 7,
+        "true_biomass": 10348.979001014879,
+        "true_depletion": 1.034897900101488,
+        "estimated_depletion": 0.7886903433464318,
+        "implemented_catch": 290.87248443152885
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 8,
+        "true_biomass": 9406.738376560106,
+        "true_depletion": 0.9406738376560106,
+        "estimated_depletion": 0.9863160961958771,
+        "implemented_catch": 326.325971541449
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 9,
+        "true_biomass": 9904.643448757752,
+        "true_depletion": 0.9904643448757752,
+        "estimated_depletion": 0.7902598739070303,
+        "implemented_catch": 280.1849697407328
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 10,
+        "true_biomass": 10594.972607276119,
+        "true_depletion": 1.0594972607276119,
+        "estimated_depletion": 0.838022233389955,
+        "implemented_catch": 293.12499849944174
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 11,
+        "true_biomass": 9161.277855650398,
+        "true_depletion": 0.9161277855650398,
+        "estimated_depletion": 1.1755867347326798,
+        "implemented_catch": 291.4088866888049
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 12,
+        "true_biomass": 10690.203913605008,
+        "true_depletion": 1.0690203913605008,
+        "estimated_depletion": 1.0614049298174866,
+        "implemented_catch": 284.6249833531164
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 13,
+        "true_biomass": 9938.447213896492,
+        "true_depletion": 0.9938447213896492,
+        "estimated_depletion": 0.9602189025309994,
+        "implemented_catch": 327.9899097158334
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 14,
+        "true_biomass": 8264.895384965905,
+        "true_depletion": 0.8264895384965905,
+        "estimated_depletion": 0.9035908631854654,
+        "implemented_catch": 280.3377162014174
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 15,
+        "true_biomass": 7309.055313889894,
+        "true_depletion": 0.7309055313889894,
+        "estimated_depletion": 0.7618281590487113,
+        "implemented_catch": 290.86632161913514
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 16,
+        "true_biomass": 8174.0479346659085,
+        "true_depletion": 0.8174047934665909,
+        "estimated_depletion": 1.0237404278948414,
+        "implemented_catch": 265.36734428229704
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 17,
+        "true_biomass": 9197.318202184317,
+        "true_depletion": 0.9197318202184317,
+        "estimated_depletion": 0.8651147526507662,
+        "implemented_catch": 344.266023845768
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 18,
+        "true_biomass": 8712.744356491457,
+        "true_depletion": 0.8712744356491458,
+        "estimated_depletion": 1.3726976890804234,
+        "implemented_catch": 325.0285298808195
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 19,
+        "true_biomass": 7778.219281816474,
+        "true_depletion": 0.7778219281816474,
+        "estimated_depletion": 0.9250022835680338,
+        "implemented_catch": 310.0125700823752
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 1,
+        "year": 20,
+        "true_biomass": 8156.949820770947,
+        "true_depletion": 0.8156949820770947,
+        "estimated_depletion": 0.5980610693093846,
+        "implemented_catch": 281.81227520856106
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 1,
+        "true_biomass": 6189.719638924482,
+        "true_depletion": 0.6189719638924481,
+        "estimated_depletion": 1.0161986167015298,
+        "implemented_catch": 286.73501876213396
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 2,
+        "true_biomass": 5323.099102595232,
+        "true_depletion": 0.5323099102595231,
+        "estimated_depletion": 0.6299795674416666,
+        "implemented_catch": 419.1115639519761
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 3,
+        "true_biomass": 5265.725841725325,
+        "true_depletion": 0.5265725841725325,
+        "estimated_depletion": 0.3882625163138372,
+        "implemented_catch": 235.07345779104617
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 4,
+        "true_biomass": 4886.880387803248,
+        "true_depletion": 0.4886880387803248,
+        "estimated_depletion": 0.5151387089862922,
+        "implemented_catch": 304.47600443820414
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 5,
+        "true_biomass": 4461.7879723747465,
+        "true_depletion": 0.44617879723747467,
+        "estimated_depletion": 0.4791111212804537,
+        "implemented_catch": 299.11841112115496
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 6,
+        "true_biomass": 5156.355998403761,
+        "true_depletion": 0.5156355998403761,
+        "estimated_depletion": 0.6090713998474003,
+        "implemented_catch": 312.28042984860093
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 7,
+        "true_biomass": 5242.7020982032855,
+        "true_depletion": 0.5242702098203286,
+        "estimated_depletion": 0.4105749171386514,
+        "implemented_catch": 254.71108515784255
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 8,
+        "true_biomass": 5497.246655541869,
+        "true_depletion": 0.5497246655541869,
+        "estimated_depletion": 0.5775560144132315,
+        "implemented_catch": 272.51199906117796
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 9,
+        "true_biomass": 5013.131145426809,
+        "true_depletion": 0.5013131145426809,
+        "estimated_depletion": 0.5105133833360413,
+        "implemented_catch": 300.3892307176756
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 10,
+        "true_biomass": 4760.502203570388,
+        "true_depletion": 0.47605022035703876,
+        "estimated_depletion": 0.4099264830573067,
+        "implemented_catch": 258.2272468892377
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 11,
+        "true_biomass": 4927.986535730983,
+        "true_depletion": 0.49279865357309827,
+        "estimated_depletion": 0.4749723783685188,
+        "implemented_catch": 283.14046597467484
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 12,
+        "true_biomass": 4215.440039476385,
+        "true_depletion": 0.4215440039476385,
+        "estimated_depletion": 0.6083502518683788,
+        "implemented_catch": 358.16457960639735
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 13,
+        "true_biomass": 3597.577392277578,
+        "true_depletion": 0.3597577392277578,
+        "estimated_depletion": 0.4326855434938122,
+        "implemented_catch": 256.8485602395119
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 14,
+        "true_biomass": 3437.286463291606,
+        "true_depletion": 0.3437286463291606,
+        "estimated_depletion": 0.42280982677558504,
+        "implemented_catch": 329.2850287982731
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 15,
+        "true_biomass": 3593.7154837381145,
+        "true_depletion": 0.35937154837381147,
+        "estimated_depletion": 0.34541950902034846,
+        "implemented_catch": 231.3183990442158
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 16,
+        "true_biomass": 3907.142661702754,
+        "true_depletion": 0.39071426617027544,
+        "estimated_depletion": 0.21388892179690325,
+        "implemented_catch": 205.65033941498922
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 17,
+        "true_biomass": 4018.287349162725,
+        "true_depletion": 0.4018287349162725,
+        "estimated_depletion": 0.540334252276452,
+        "implemented_catch": 191.66750085802659
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 18,
+        "true_biomass": 4732.132775716875,
+        "true_depletion": 0.47321327757168746,
+        "estimated_depletion": 0.428607190100015,
+        "implemented_catch": 323.4287171890961
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 19,
+        "true_biomass": 4990.447839223782,
+        "true_depletion": 0.49904478392237817,
+        "estimated_depletion": 0.37620955687033686,
+        "implemented_catch": 241.07316064105734
+      },
+      {
+        "procedure": "Conservative",
+        "simulation": 2,
+        "year": 20,
+        "true_biomass": 5147.188150491435,
+        "true_depletion": 0.5147188150491435,
+        "estimated_depletion": 0.5497491058482661,
+        "implemented_catch": 273.31658450601446
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 1,
+        "true_biomass": 10351.052490510843,
+        "true_depletion": 1.0351052490510844,
+        "estimated_depletion": 0.7353276460608108,
+        "implemented_catch": 428.0827716247104
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 2,
+        "true_biomass": 10082.183013837543,
+        "true_depletion": 1.0082183013837542,
+        "estimated_depletion": 1.0273153049242942,
+        "implemented_catch": 401.88746540778334
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 3,
+        "true_biomass": 9259.493860181672,
+        "true_depletion": 0.9259493860181672,
+        "estimated_depletion": 0.8599495942323921,
+        "implemented_catch": 356.79742301192806
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 4,
+        "true_biomass": 9053.482603582775,
+        "true_depletion": 0.9053482603582775,
+        "estimated_depletion": 0.9758714990534086,
+        "implemented_catch": 402.3290581451197
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 5,
+        "true_biomass": 9628.633629016336,
+        "true_depletion": 0.9628633629016337,
+        "estimated_depletion": 0.9343018714099933,
+        "implemented_catch": 365.644539256284
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 6,
+        "true_biomass": 9020.985178116875,
+        "true_depletion": 0.9020985178116875,
+        "estimated_depletion": 1.0168663672543556,
+        "implemented_catch": 364.589736479563
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 7,
+        "true_biomass": 11173.2240818389,
+        "true_depletion": 1.11732240818389,
+        "estimated_depletion": 0.9620268129547883,
+        "implemented_catch": 336.7065334914644
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 8,
+        "true_biomass": 12049.389629837091,
+        "true_depletion": 1.204938962983709,
+        "estimated_depletion": 1.0226450895160666,
+        "implemented_catch": 373.53538797046855
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 9,
+        "true_biomass": 12575.97448632922,
+        "true_depletion": 1.257597448632922,
+        "estimated_depletion": 1.1561366374590851,
+        "implemented_catch": 452.63246389525546
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 10,
+        "true_biomass": 11660.588989654718,
+        "true_depletion": 1.1660588989654719,
+        "estimated_depletion": 0.9502043595035579,
+        "implemented_catch": 477.82870439364666
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 11,
+        "true_biomass": 12414.01648338319,
+        "true_depletion": 1.241401648338319,
+        "estimated_depletion": 0.9329021975863119,
+        "implemented_catch": 466.2705728829727
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 12,
+        "true_biomass": 12713.436895858964,
+        "true_depletion": 1.2713436895858965,
+        "estimated_depletion": 0.970628092713679,
+        "implemented_catch": 438.38050076688756
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 13,
+        "true_biomass": 13344.607651029097,
+        "true_depletion": 1.3344607651029097,
+        "estimated_depletion": 1.1246874465361187,
+        "implemented_catch": 476.132541003122
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 14,
+        "true_biomass": 13739.037267437785,
+        "true_depletion": 1.3739037267437786,
+        "estimated_depletion": 1.5156848232392104,
+        "implemented_catch": 412.07881687787176
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 15,
+        "true_biomass": 13289.3184754396,
+        "true_depletion": 1.32893184754396,
+        "estimated_depletion": 1.9284025699071998,
+        "implemented_catch": 354.833433452535
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 16,
+        "true_biomass": 10867.350577105532,
+        "true_depletion": 1.0867350577105532,
+        "estimated_depletion": 1.6255849082891354,
+        "implemented_catch": 455.5188443606633
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 17,
+        "true_biomass": 9906.21068086178,
+        "true_depletion": 0.9906210680861779,
+        "estimated_depletion": 0.763654855575289,
+        "implemented_catch": 354.53009181077107
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 18,
+        "true_biomass": 7270.249365549842,
+        "true_depletion": 0.7270249365549842,
+        "estimated_depletion": 1.0142790322233701,
+        "implemented_catch": 429.3529337474728
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 19,
+        "true_biomass": 9030.867463708522,
+        "true_depletion": 0.9030867463708523,
+        "estimated_depletion": 0.6424699382199307,
+        "implemented_catch": 345.1822650472332
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 0,
+        "year": 20,
+        "true_biomass": 10436.55063717444,
+        "true_depletion": 1.043655063717444,
+        "estimated_depletion": 0.8603050218620656,
+        "implemented_catch": 399.90535033173967
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 1,
+        "true_biomass": 8402.918350660977,
+        "true_depletion": 0.8402918350660977,
+        "estimated_depletion": 0.7994442135432189,
+        "implemented_catch": 424.37713133980867
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 2,
+        "true_biomass": 7107.872076496744,
+        "true_depletion": 0.7107872076496744,
+        "estimated_depletion": 0.8344154527874276,
+        "implemented_catch": 456.42454278808196
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 3,
+        "true_biomass": 6830.367247340069,
+        "true_depletion": 0.6830367247340069,
+        "estimated_depletion": 1.045884699041014,
+        "implemented_catch": 478.04673677702124
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 4,
+        "true_biomass": 7892.516014055926,
+        "true_depletion": 0.7892516014055926,
+        "estimated_depletion": 0.7618435065036278,
+        "implemented_catch": 447.4287551850251
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 5,
+        "true_biomass": 8325.830654364208,
+        "true_depletion": 0.8325830654364208,
+        "estimated_depletion": 0.969050070916986,
+        "implemented_catch": 405.69254321645514
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 6,
+        "true_biomass": 8811.709550156484,
+        "true_depletion": 0.8811709550156483,
+        "estimated_depletion": 0.6877571807869107,
+        "implemented_catch": 388.5645806720134
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 7,
+        "true_biomass": 11240.442658193573,
+        "true_depletion": 1.1240442658193572,
+        "estimated_depletion": 0.8300909022125241,
+        "implemented_catch": 408.04454514615543
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 8,
+        "true_biomass": 10232.2492454057,
+        "true_depletion": 1.02322492454057,
+        "estimated_depletion": 1.5705072613352293,
+        "implemented_catch": 368.25829074187254
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 9,
+        "true_biomass": 10654.810966921255,
+        "true_depletion": 1.0654810966921255,
+        "estimated_depletion": 1.0194286281407334,
+        "implemented_catch": 365.1850837362292
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 10,
+        "true_biomass": 9480.82538018801,
+        "true_depletion": 0.9480825380188009,
+        "estimated_depletion": 0.8740619890543285,
+        "implemented_catch": 420.0903942643362
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 11,
+        "true_biomass": 8147.109144730078,
+        "true_depletion": 0.8147109144730078,
+        "estimated_depletion": 0.9335131831611018,
+        "implemented_catch": 400.8443712090311
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 12,
+        "true_biomass": 6928.390080514669,
+        "true_depletion": 0.6928390080514668,
+        "estimated_depletion": 0.7418643908377043,
+        "implemented_catch": 422.1039337433672
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 13,
+        "true_biomass": 6711.269449581075,
+        "true_depletion": 0.6711269449581074,
+        "estimated_depletion": 0.8481811384719234,
+        "implemented_catch": 435.5032532950983
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 14,
+        "true_biomass": 6416.9188789608315,
+        "true_depletion": 0.6416918878960831,
+        "estimated_depletion": 0.7244126395527888,
+        "implemented_catch": 396.8269854019595
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 15,
+        "true_biomass": 5302.60300362563,
+        "true_depletion": 0.530260300362563,
+        "estimated_depletion": 0.5802489969208751,
+        "implemented_catch": 406.61602175823157
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 16,
+        "true_biomass": 6492.327560701676,
+        "true_depletion": 0.6492327560701676,
+        "estimated_depletion": 0.6733904002666685,
+        "implemented_catch": 413.7557989959466
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 17,
+        "true_biomass": 6551.868932854102,
+        "true_depletion": 0.6551868932854102,
+        "estimated_depletion": 0.7008021019123941,
+        "implemented_catch": 360.38318673265843
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 18,
+        "true_biomass": 7170.374865061812,
+        "true_depletion": 0.7170374865061812,
+        "estimated_depletion": 0.9826730882303994,
+        "implemented_catch": 350.0238819771711
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 19,
+        "true_biomass": 7429.384292526424,
+        "true_depletion": 0.7429384292526424,
+        "estimated_depletion": 0.9368094129558349,
+        "implemented_catch": 326.0578529338458
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 1,
+        "year": 20,
+        "true_biomass": 7123.88894685336,
+        "true_depletion": 0.712388894685336,
+        "estimated_depletion": 0.882288324679997,
+        "implemented_catch": 365.9975392733586
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 1,
+        "true_biomass": 8546.048544576133,
+        "true_depletion": 0.8546048544576134,
+        "estimated_depletion": 0.9595933889475419,
+        "implemented_catch": 410.229418449645
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 2,
+        "true_biomass": 7820.9127920631345,
+        "true_depletion": 0.7820912792063135,
+        "estimated_depletion": 0.7851019560010367,
+        "implemented_catch": 400.51963142450717
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 3,
+        "true_biomass": 8072.688864631084,
+        "true_depletion": 0.8072688864631083,
+        "estimated_depletion": 0.6329882871346632,
+        "implemented_catch": 390.49095155524304
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 4,
+        "true_biomass": 9162.528444957132,
+        "true_depletion": 0.9162528444957132,
+        "estimated_depletion": 0.5590548699687818,
+        "implemented_catch": 403.2380599682158
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 5,
+        "true_biomass": 10922.784372172566,
+        "true_depletion": 1.0922784372172565,
+        "estimated_depletion": 0.501026921762277,
+        "implemented_catch": 417.8122537350654
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 6,
+        "true_biomass": 10243.272735895402,
+        "true_depletion": 1.0243272735895401,
+        "estimated_depletion": 1.1359543996093946,
+        "implemented_catch": 402.30000091708865
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 7,
+        "true_biomass": 10873.136276806985,
+        "true_depletion": 1.0873136276806985,
+        "estimated_depletion": 1.3148631332975673,
+        "implemented_catch": 439.1410413960548
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 8,
+        "true_biomass": 13788.708170466758,
+        "true_depletion": 1.378870817046676,
+        "estimated_depletion": 0.9947870175116277,
+        "implemented_catch": 379.97034625260443
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 9,
+        "true_biomass": 13023.023163253783,
+        "true_depletion": 1.3023023163253784,
+        "estimated_depletion": 1.4619620119177434,
+        "implemented_catch": 465.6891550363329
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 10,
+        "true_biomass": 11152.526723189827,
+        "true_depletion": 1.1152526723189826,
+        "estimated_depletion": 1.4347370183212782,
+        "implemented_catch": 421.36145118484404
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 11,
+        "true_biomass": 10473.799231801506,
+        "true_depletion": 1.0473799231801506,
+        "estimated_depletion": 0.995276706202841,
+        "implemented_catch": 475.483091275261
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 12,
+        "true_biomass": 10296.861926020933,
+        "true_depletion": 1.0296861926020933,
+        "estimated_depletion": 1.1577463531577998,
+        "implemented_catch": 498.8351299509207
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 13,
+        "true_biomass": 12235.349548850014,
+        "true_depletion": 1.2235349548850014,
+        "estimated_depletion": 0.8336823166577099,
+        "implemented_catch": 363.6891002280578
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 14,
+        "true_biomass": 11797.580755742087,
+        "true_depletion": 1.1797580755742088,
+        "estimated_depletion": 1.061441977877315,
+        "implemented_catch": 345.3074170395007
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 15,
+        "true_biomass": 13142.15209354544,
+        "true_depletion": 1.3142152093545438,
+        "estimated_depletion": 0.957318165200701,
+        "implemented_catch": 436.02918413158784
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 16,
+        "true_biomass": 12527.652875079784,
+        "true_depletion": 1.2527652875079784,
+        "estimated_depletion": 1.7492228474081257,
+        "implemented_catch": 474.0126571435363
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 17,
+        "true_biomass": 11094.681655922848,
+        "true_depletion": 1.109468165592285,
+        "estimated_depletion": 1.1121133067415716,
+        "implemented_catch": 433.9805022315766
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 18,
+        "true_biomass": 10165.341436926434,
+        "true_depletion": 1.0165341436926434,
+        "estimated_depletion": 0.7654764969299331,
+        "implemented_catch": 447.447139257402
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 19,
+        "true_biomass": 10550.03304928779,
+        "true_depletion": 1.055003304928779,
+        "estimated_depletion": 0.939852944976331,
+        "implemented_catch": 364.23658963363994
+      },
+      {
+        "procedure": "Balanced",
+        "simulation": 2,
+        "year": 20,
+        "true_biomass": 10675.351100402502,
+        "true_depletion": 1.0675351100402501,
+        "estimated_depletion": 0.866424087631419,
+        "implemented_catch": 390.4897234623843
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 1,
+        "true_biomass": 8204.976918344631,
+        "true_depletion": 0.8204976918344632,
+        "estimated_depletion": 0.78402573504206,
+        "implemented_catch": 488.7648876833741
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 2,
+        "true_biomass": 8063.385349991322,
+        "true_depletion": 0.8063385349991322,
+        "estimated_depletion": 1.0083059289666363,
+        "implemented_catch": 401.26107084316436
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 3,
+        "true_biomass": 9360.534172900449,
+        "true_depletion": 0.9360534172900449,
+        "estimated_depletion": 1.1066503425819731,
+        "implemented_catch": 419.8993451891445
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 4,
+        "true_biomass": 10720.882974075259,
+        "true_depletion": 1.0720882974075259,
+        "estimated_depletion": 0.8171472394364983,
+        "implemented_catch": 441.5054131122308
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 5,
+        "true_biomass": 9984.172929280989,
+        "true_depletion": 0.9984172929280989,
+        "estimated_depletion": 1.239992473122726,
+        "implemented_catch": 454.50045666408425
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 6,
+        "true_biomass": 9375.284663112176,
+        "true_depletion": 0.9375284663112176,
+        "estimated_depletion": 0.6810032508016304,
+        "implemented_catch": 470.57967072673324
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 7,
+        "true_biomass": 10985.329924615402,
+        "true_depletion": 1.0985329924615401,
+        "estimated_depletion": 1.2198728186496526,
+        "implemented_catch": 480.74124351981993
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 8,
+        "true_biomass": 12075.71090579856,
+        "true_depletion": 1.207571090579856,
+        "estimated_depletion": 0.9772519059410828,
+        "implemented_catch": 459.6761355118512
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 9,
+        "true_biomass": 10968.177786414675,
+        "true_depletion": 1.0968177786414675,
+        "estimated_depletion": 1.5457936911705363,
+        "implemented_catch": 454.02921926937455
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 10,
+        "true_biomass": 8176.929441621206,
+        "true_depletion": 0.8176929441621206,
+        "estimated_depletion": 0.870899681536864,
+        "implemented_catch": 471.15394835748515
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 11,
+        "true_biomass": 7815.512211506637,
+        "true_depletion": 0.7815512211506637,
+        "estimated_depletion": 0.6587575109323199,
+        "implemented_catch": 419.2386931514378
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 12,
+        "true_biomass": 7787.499962019152,
+        "true_depletion": 0.7787499962019152,
+        "estimated_depletion": 1.0102904628284015,
+        "implemented_catch": 477.24284228793414
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 13,
+        "true_biomass": 7257.2049027563025,
+        "true_depletion": 0.7257204902756302,
+        "estimated_depletion": 0.9484705393810725,
+        "implemented_catch": 584.7156523757249
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 14,
+        "true_biomass": 7233.666742105871,
+        "true_depletion": 0.7233666742105871,
+        "estimated_depletion": 0.838356769787825,
+        "implemented_catch": 509.0843962566223
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 15,
+        "true_biomass": 6978.470088151463,
+        "true_depletion": 0.6978470088151463,
+        "estimated_depletion": 0.5545752060036441,
+        "implemented_catch": 450.88090556031
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 16,
+        "true_biomass": 6909.4894509381,
+        "true_depletion": 0.69094894509381,
+        "estimated_depletion": 0.5979206001646239,
+        "implemented_catch": 475.2625987296616
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 17,
+        "true_biomass": 7248.150182205936,
+        "true_depletion": 0.7248150182205936,
+        "estimated_depletion": 1.0481870344747821,
+        "implemented_catch": 464.5291449107356
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 18,
+        "true_biomass": 7638.3322589912505,
+        "true_depletion": 0.7638332258991251,
+        "estimated_depletion": 0.6938319874990233,
+        "implemented_catch": 441.6649966971119
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 19,
+        "true_biomass": 8140.476407017393,
+        "true_depletion": 0.8140476407017393,
+        "estimated_depletion": 0.7643011027470585,
+        "implemented_catch": 423.0007506472834
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 0,
+        "year": 20,
+        "true_biomass": 8133.219319404799,
+        "true_depletion": 0.8133219319404799,
+        "estimated_depletion": 0.7090812778619217,
+        "implemented_catch": 443.2131437800067
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 1,
+        "true_biomass": 8551.151268324684,
+        "true_depletion": 0.8551151268324684,
+        "estimated_depletion": 0.8301843690209932,
+        "implemented_catch": 504.78078061848174
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 2,
+        "true_biomass": 7420.3462660894775,
+        "true_depletion": 0.7420346266089477,
+        "estimated_depletion": 0.6871666614503918,
+        "implemented_catch": 360.25042628857364
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 3,
+        "true_biomass": 7969.453326238094,
+        "true_depletion": 0.7969453326238094,
+        "estimated_depletion": 0.5799711797398095,
+        "implemented_catch": 533.9120210667845
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 4,
+        "true_biomass": 7399.690170285287,
+        "true_depletion": 0.7399690170285288,
+        "estimated_depletion": 0.8533013048066814,
+        "implemented_catch": 434.8426345495573
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 5,
+        "true_biomass": 7954.889471026886,
+        "true_depletion": 0.7954889471026886,
+        "estimated_depletion": 0.6836346247569443,
+        "implemented_catch": 436.2142099552617
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 6,
+        "true_biomass": 7345.2085947904525,
+        "true_depletion": 0.7345208594790452,
+        "estimated_depletion": 0.5636260757307012,
+        "implemented_catch": 439.1590250935912
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 7,
+        "true_biomass": 8014.21277546971,
+        "true_depletion": 0.801421277546971,
+        "estimated_depletion": 0.6748326159617343,
+        "implemented_catch": 458.0559462742167
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 8,
+        "true_biomass": 6994.381396212486,
+        "true_depletion": 0.6994381396212486,
+        "estimated_depletion": 0.6627206858317198,
+        "implemented_catch": 439.4949055637474
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 9,
+        "true_biomass": 7065.076594025892,
+        "true_depletion": 0.7065076594025892,
+        "estimated_depletion": 0.8326635823801171,
+        "implemented_catch": 424.7173337014664
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 10,
+        "true_biomass": 6216.29659814729,
+        "true_depletion": 0.621629659814729,
+        "estimated_depletion": 0.5874168773084806,
+        "implemented_catch": 557.5823608241466
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 11,
+        "true_biomass": 6545.7596152960705,
+        "true_depletion": 0.6545759615296071,
+        "estimated_depletion": 0.5237764730140678,
+        "implemented_catch": 441.4446896655506
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 12,
+        "true_biomass": 8370.41204005374,
+        "true_depletion": 0.837041204005374,
+        "estimated_depletion": 0.7700527215532414,
+        "implemented_catch": 432.9060058903536
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 13,
+        "true_biomass": 7619.299740779099,
+        "true_depletion": 0.7619299740779099,
+        "estimated_depletion": 0.8876127047102814,
+        "implemented_catch": 439.21946669574965
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 14,
+        "true_biomass": 8733.098397461632,
+        "true_depletion": 0.8733098397461632,
+        "estimated_depletion": 0.8297293157614329,
+        "implemented_catch": 415.4650246272954
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 15,
+        "true_biomass": 10041.601857596954,
+        "true_depletion": 1.0041601857596953,
+        "estimated_depletion": 1.1703157571600986,
+        "implemented_catch": 481.44028289413103
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 16,
+        "true_biomass": 9136.507927616709,
+        "true_depletion": 0.9136507927616709,
+        "estimated_depletion": 0.9482280037875426,
+        "implemented_catch": 495.0119482967263
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 17,
+        "true_biomass": 9721.49494493726,
+        "true_depletion": 0.972149494493726,
+        "estimated_depletion": 1.1525260296649025,
+        "implemented_catch": 422.5133591925011
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 18,
+        "true_biomass": 9438.306427019941,
+        "true_depletion": 0.9438306427019941,
+        "estimated_depletion": 1.3096876281074536,
+        "implemented_catch": 474.501622426021
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 19,
+        "true_biomass": 9846.612391273215,
+        "true_depletion": 0.9846612391273215,
+        "estimated_depletion": 0.7745197778330712,
+        "implemented_catch": 480.59685439633404
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 1,
+        "year": 20,
+        "true_biomass": 10158.353970608077,
+        "true_depletion": 1.0158353970608078,
+        "estimated_depletion": 0.7653640412128981,
+        "implemented_catch": 425.36132495770454
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 1,
+        "true_biomass": 7035.3765437529355,
+        "true_depletion": 0.7035376543752936,
+        "estimated_depletion": 0.8726824163635604,
+        "implemented_catch": 504.1604235712648
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 2,
+        "true_biomass": 6159.683273066438,
+        "true_depletion": 0.6159683273066439,
+        "estimated_depletion": 0.7864225105040747,
+        "implemented_catch": 652.7614728464534
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 3,
+        "true_biomass": 7051.8461688509815,
+        "true_depletion": 0.7051846168850981,
+        "estimated_depletion": 0.5624273214868742,
+        "implemented_catch": 405.1456523253711
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 4,
+        "true_biomass": 8426.62914849766,
+        "true_depletion": 0.842662914849766,
+        "estimated_depletion": 0.685881366152052,
+        "implemented_catch": 493.82805826189997
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 5,
+        "true_biomass": 7494.945109907385,
+        "true_depletion": 0.7494945109907385,
+        "estimated_depletion": 0.5937430515827444,
+        "implemented_catch": 448.37920226663664
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 6,
+        "true_biomass": 6324.763940866427,
+        "true_depletion": 0.6324763940866427,
+        "estimated_depletion": 0.526178407690721,
+        "implemented_catch": 512.8046109806089
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 7,
+        "true_biomass": 5259.945927790567,
+        "true_depletion": 0.5259945927790567,
+        "estimated_depletion": 0.6028441856060134,
+        "implemented_catch": 456.53220924838104
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 8,
+        "true_biomass": 4027.348001374307,
+        "true_depletion": 0.4027348001374307,
+        "estimated_depletion": 0.7284443568327281,
+        "implemented_catch": 401.3456289943651
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 9,
+        "true_biomass": 4157.68473983016,
+        "true_depletion": 0.415768473983016,
+        "estimated_depletion": 0.3676180113434932,
+        "implemented_catch": 448.17414908962155
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 10,
+        "true_biomass": 4321.594762538251,
+        "true_depletion": 0.4321594762538251,
+        "estimated_depletion": 0.33776253025009945,
+        "implemented_catch": 399.0168059781294
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 11,
+        "true_biomass": 4359.052257178821,
+        "true_depletion": 0.43590522571788204,
+        "estimated_depletion": 0.4577388536462081,
+        "implemented_catch": 438.65227147704405
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 12,
+        "true_biomass": 4209.958241197775,
+        "true_depletion": 0.42099582411977754,
+        "estimated_depletion": 0.38888450206729025,
+        "implemented_catch": 375.7836852709339
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 13,
+        "true_biomass": 3286.815437431192,
+        "true_depletion": 0.3286815437431192,
+        "estimated_depletion": 0.4046603479955988,
+        "implemented_catch": 449.7614010033106
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 14,
+        "true_biomass": 4414.092219987029,
+        "true_depletion": 0.4414092219987029,
+        "estimated_depletion": 0.40199515139199604,
+        "implemented_catch": 434.84955942232716
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 15,
+        "true_biomass": 4909.525589031985,
+        "true_depletion": 0.4909525589031985,
+        "estimated_depletion": 0.4160378830735579,
+        "implemented_catch": 432.39048090461193
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 16,
+        "true_biomass": 4461.737996161199,
+        "true_depletion": 0.44617379961611986,
+        "estimated_depletion": 0.5001359328042179,
+        "implemented_catch": 427.0831942225749
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 17,
+        "true_biomass": 3983.9513995230323,
+        "true_depletion": 0.39839513995230325,
+        "estimated_depletion": 0.5637997681927063,
+        "implemented_catch": 471.57361266069984
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 18,
+        "true_biomass": 3523.3326544585275,
+        "true_depletion": 0.35233326544585275,
+        "estimated_depletion": 0.30605363588989914,
+        "implemented_catch": 397.99928527779974
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 19,
+        "true_biomass": 3330.159837564605,
+        "true_depletion": 0.33301598375646047,
+        "estimated_depletion": 0.5566154787804035,
+        "implemented_catch": 446.99283394411077
+      },
+      {
+        "procedure": "Yield focused",
+        "simulation": 2,
+        "year": 20,
+        "true_biomass": 4077.313138044833,
+        "true_depletion": 0.4077313138044833,
+        "estimated_depletion": 0.32865572761856215,
+        "implemented_catch": 511.4914619740415
+      }
+    ],
+    "interpretation": "Closed-loop MSE separates operating truth, observation error, assessment, management decision and implementation error."
+  },
+  "benchmarks": {
+    "summary": {
+      "total": 9,
+      "passed": 9,
+      "failed": 0
+    },
+    "results": [
+      {
+        "name": "Schaefer production at B=K/2",
+        "expected": 450.0,
+        "actual": 450.0,
+        "absolute_difference": 0.0,
+        "relative_difference": 0.0,
+        "tolerance": 1e-10,
+        "status": "PASS",
+        "category": "population dynamics",
+        "notes": ""
+      },
+      {
+        "name": "Annual survival M=0.12",
+        "expected": 0.8869204367171575,
+        "actual": 0.8869204367171575,
+        "absolute_difference": 0.0,
+        "relative_difference": 0.0,
+        "tolerance": 1e-12,
+        "status": "PASS",
+        "category": "mortality",
+        "notes": ""
+      },
+      {
+        "name": "Movement row conservation",
+        "expected": 1.0,
+        "actual": 1.0,
+        "absolute_difference": 0.0,
+        "relative_difference": 0.0,
+        "tolerance": 1e-12,
+        "status": "PASS",
+        "category": "movement",
+        "notes": "Maximum row sum should equal one."
+      },
+      {
+        "name": "Ageing-error row conservation",
+        "expected": 1.0,
+        "actual": 1.0,
+        "absolute_difference": 0.0,
+        "relative_difference": 0.0,
+        "tolerance": 1e-12,
+        "status": "PASS",
+        "category": "observation",
+        "notes": ""
+      },
+      {
+        "name": "Ageing-error composition conservation",
+        "expected": 1.0,
+        "actual": 1.0,
+        "absolute_difference": 0.0,
+        "relative_difference": 0.0,
+        "tolerance": 1e-12,
+        "status": "PASS",
+        "category": "observation",
+        "notes": ""
+      },
+      {
+        "name": "Multinomial residual sum",
+        "expected": 0.0,
+        "actual": 0.0,
+        "absolute_difference": 0.0,
+        "relative_difference": 0.0,
+        "tolerance": 1e-12,
+        "status": "PASS",
+        "category": "likelihood",
+        "notes": ""
+      },
+      {
+        "name": "Dirichlet-multinomial residual sum",
+        "expected": 0.0,
+        "actual": 0.0,
+        "absolute_difference": 0.0,
+        "relative_difference": 0.0,
+        "tolerance": 1e-12,
+        "status": "PASS",
+        "category": "likelihood",
+        "notes": ""
+      },
+      {
+        "name": "Tag recapture expectation",
+        "expected": 40.0,
+        "actual": 40.0,
+        "absolute_difference": 0.0,
+        "relative_difference": 0.0,
+        "tolerance": 1e-10,
+        "status": "PASS",
+        "category": "tagging",
+        "notes": ""
+      },
+      {
+        "name": "Spatial model positive terminal biomass",
+        "expected": 1.0,
+        "actual": 1.0,
+        "absolute_difference": 0.0,
+        "relative_difference": 0.0,
+        "tolerance": 0.0,
+        "status": "PASS",
+        "category": "integrated model",
+        "notes": ""
+      }
+    ],
+    "verdict": "PASS",
+    "scope_note": "These are deterministic software benchmarks. Independent assessment replication and uncertainty-coverage studies remain separate scientific validation tasks."
+  },
+  "limitations": [
+    "This build provides functional foundations, not independent peer review.",
+    "The generated SS3 files are starting templates and require stock-specific control configuration.",
+    "Random-walk MCMC is a baseline sampler and not HMC/NUTS.",
+    "Real-stock accuracy remains dependent on data quality, observation models and verified model configuration."
+  ],
+  "ss3_export": {
+    "starter.ss": "models/Omega_Complete_Release_11_Demo/ss3_export/starter.ss",
+    "data.ss": "models/Omega_Complete_Release_11_Demo/ss3_export/data.ss",
+    "control.ss": "models/Omega_Complete_Release_11_Demo/ss3_export/control.ss",
+    "forecast.ss": "models/Omega_Complete_Release_11_Demo/ss3_export/forecast.ss",
+    "manifest": "models/Omega_Complete_Release_11_Demo/ss3_export/omega_ss3_manifest.json"
+  }
+}

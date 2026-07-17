@@ -1,0 +1,18 @@
+{
+  "generated_by": "Omega FISH Model",
+  "files": [
+    "starter.ss",
+    "data.ss",
+    "control.ss",
+    "forecast.ss"
+  ],
+  "years": [
+    2000,
+    2007
+  ],
+  "max_age": 20,
+  "sexes": 2,
+  "areas": 3,
+  "seasons": 4,
+  "warning": "Generated files are a syntactic foundation and require stock-specific SS3 control settings and validation before execution."
+}

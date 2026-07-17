@@ -1,0 +1,13 @@
+{
+  "repository": "https://github.com/nmfs-ost/ss3-test-models",
+  "commit": "3d1f9c0aad7e439a73bd807b02d0ffe4d7b3b944",
+  "model": "Simple",
+  "derivation": "Curated parser and deterministic-validation excerpts; these files are not byte-identical copies of the complete NOAA model folder.",
+  "files": {
+    "starter.ss": {"sha256": "f136141bbdf51514b7bda41376e23f1fdb0792f09b015018cbe06c06e529b2c2", "coverage": "deterministic starter fixture"},
+    "data.ss": {"sha256": "e214a6107f2a39c977cfd3f3cb77f9d412171bb337ee5005f036b37b051d86de", "coverage": "core header, fleets, catch, CPUE"},
+    "control.ss": {"sha256": "261de4cffa1f02c16257e3c90397f956cbcd48660c2557bbc5f5d4d8a6991b7f", "coverage": "core biology, recruitment and reference F vectors"}
+  },
+  "purpose": "Software validation only",
+  "warning": "The NOAA ss3-test-models repository states that its test-model data may be altered and must not be used as assessment data sources."
+}

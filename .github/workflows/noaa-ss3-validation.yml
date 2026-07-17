@@ -1,0 +1,75 @@
+name: NOAA SS3 validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  omega-tests:
+    runs-on: ubuntu-latest
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install runtime and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements_runtime.txt pytest
+      - name: Run complete Omega test suite
+        run: python -m pytest -q
+      - name: Run pinned NOAA Simple deterministic validation
+        run: python omega_cli.py noaa-validate validation_data/noaa_ss3/Simple --model-name Simple --output-dir reports/noaa_offline
+      - name: Run Omega self-check
+        run: python omega_self_check.py --output reports/self_check_latest.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: omega-offline-validation
+          path: |
+            reports/noaa_offline
+            reports/self_check_latest.json
+
+  native-ss3-windows:
+    runs-on: windows-latest
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements_runtime.txt pytest
+      - name: Download pinned official NOAA Simple model
+        shell: pwsh
+        run: python omega_cli.py noaa-download Simple --output validation_cache/noaa_ss3
+      - name: Download latest official NOAA SS3 Windows executable
+        shell: pwsh
+        run: python omega_cli.py ss3-download --platform windows --output tools/ss3 | Out-File -Encoding utf8 ss3_download_manifest.json
+      - name: Run native SS3 and Omega comparison
+        shell: pwsh
+        run: |
+          $manifest = Get-Content ss3_download_manifest.json -Raw | ConvertFrom-Json
+          python omega_cli.py noaa-validate validation_cache/noaa_ss3/Simple --model-name Simple --ss3-executable "$($manifest.executable)" --output-dir reports/noaa_native
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: omega-native-ss3-validation
+          path: |
+            reports/noaa_native
+            ss3_download_manifest.json
+            tools/ss3/**/omega_ss3_executable_manifest.json
